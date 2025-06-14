@@ -14,7 +14,7 @@ def load_data(file_path):
             next(data) 
 
         for row in data:
-            new_package = Package(row[0], row[1], row[2], row[3], row[4], row[5], row[6])
+            new_package = Package(row[0], row[1], row[2], row[3], row[4], row[5], row[6], row[7])
             packages.append(new_package)
     return packages
 
@@ -42,8 +42,8 @@ for i, bucket in enumerate(hash_table):
     if bucket is not None:
         if isinstance(bucket, list):
             for package in bucket:
-                print(f"Hash Index: {i}, Package ID: {package.id}, Address: {package.address}, City: {package.city}, State: {package.state}, Zip: {package.zip}, Deadline: {package.deadline}, Weight: {package.weight}, Dependencies: {package.dependencies}")
+                print(f"Hash Index: {i}, Package ID: {package.id}, Address: {package.address}, City: {package.city}, State: {package.state}, Zip: {package.zip}, Deadline: {package.deadline}, Weight: {package.weight}, Notes: {package.notes}")
         else:
-            print(f"Hash Index: {i}, Package ID: {bucket.id}, Address: {bucket.address}, City: {bucket.city}, State: {bucket.state}, Zip: {bucket.zip}, Deadline: {bucket.deadline}, Weight: {bucket.weight}, Dependencies: {bucket.dependencies}")
+            print(f"Hash Index: {i}, Package ID: {bucket.id}, Address: {bucket.address}, City: {bucket.city}, State: {bucket.state}, Zip: {bucket.zip}, Deadline: {bucket.deadline}, Weight: {bucket.weight}, Notes: {bucket.notes}")
     else:
         print(f"Hash Index: {i} is empty.")
