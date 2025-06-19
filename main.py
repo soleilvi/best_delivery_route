@@ -1,15 +1,17 @@
 import csv
 from package import Package
+from place import Place
 
-hash_table = [None] * 35  # Set the size of the hash table to the average number of packages + 5
+package_hash = [None] * 35  # Set the size of the hash table to the average number of packages + 5
+places_hash = [None] * 36  # not sure yet
 
-def load_data(file_path):
+def load_package_data(file_path):
     packages = []
 
     with open(file_path, 'r') as file:
         data = csv.reader(file, delimiter=',')
 
-        # Skip the next 11 lines of the CSV file
+        # Skip the next 8 lines of the CSV file
         for num in range(8):
             next(data) 
 
@@ -32,18 +34,37 @@ def load_hash(package_list, hash_list):
         else:
             hash_list[index].append(package)
 
+def load_distance_data(file_path):
+    places = []
+    counter = 0
 
-# Print packages data        
-packages = load_data('./data/package_data.csv')
+    with open(file_path, 'r') as file:
+        data = csv.reader(file, delimiter=',')
+
+        # Skip the next 8 lines of the CSV file
+        for num in range(8):
+            next(data) 
+
+        for row in data:
+            new_place = Place(counter, row[0], row[1])
+            places.append(new_place)
+            counter += 1
+    return places
+
+packages = load_package_data('./data/package_data.csv')
+places = load_distance_data('./data/distance_data.csv')
+
+for place in places:
+    print(f'Id: {place.id}, Name: {place.name}, Address: {place.address}')
 
 # Print hash
-load_hash(packages, hash_table)
-for i, bucket in enumerate(hash_table):
-    if bucket is not None:
-        if isinstance(bucket, list):
-            for package in bucket:
-                print(f"Hash Index: {i}, Package ID: {package.id}, Address: {package.address}, City: {package.city}, State: {package.state}, Zip: {package.zip}, Deadline: {package.deadline}, Weight: {package.weight}, Notes: {package.notes}")
-        else:
-            print(f"Hash Index: {i}, Package ID: {bucket.id}, Address: {bucket.address}, City: {bucket.city}, State: {bucket.state}, Zip: {bucket.zip}, Deadline: {bucket.deadline}, Weight: {bucket.weight}, Notes: {bucket.notes}")
-    else:
-        print(f"Hash Index: {i} is empty.")
+# load_hash(packages, package_hash)
+# for i, bucket in enumerate(package_hash):
+#     if bucket is not None:
+#         if isinstance(bucket, list):
+#             for package in bucket:
+#                 print(f"Hash Index: {i}, Package ID: {package.id}, Address: {package.address}, City: {package.city}, State: {package.state}, Zip: {package.zip}, Deadline: {package.deadline}, Weight: {package.weight}, Notes: {package.notes}")
+#         else:
+#             print(f"Hash Index: {i}, Package ID: {bucket.id}, Address: {bucket.address}, City: {bucket.city}, State: {bucket.state}, Zip: {bucket.zip}, Deadline: {bucket.deadline}, Weight: {bucket.weight}, Notes: {bucket.notes}")
+#     else:
+#         print(f"Hash Index: {i} is empty.")
