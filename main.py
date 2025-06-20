@@ -4,7 +4,6 @@ from place import Place
 
 package_hash = [None] * 35  # Set the size of the hash table to the average number of packages + 5
 places_hash = [None] * 1000
-nodes = 0
 
 def load_package_data(file_path):
     packages = []
@@ -23,7 +22,8 @@ def load_package_data(file_path):
 
 def load_distance_data(file_path):
     places = []
-    counter = 0
+    place_id = 0
+    distances_counter = 1  # represents how many distances are associated with each place in distance_data
 
     with open(file_path, 'r') as file:
         data = csv.reader(file, delimiter=',')
@@ -33,9 +33,15 @@ def load_distance_data(file_path):
             next(data) 
 
         for row in data:
-            new_place = Place(counter, row[0], row[1])
+            new_place = Place(place_id, row[0], row[1])
+            
+            for i in range(distances_counter):
+                new_place.distances.append(row[i + 2])  # + 1 for the row, and another +1 to compensate for the fact that i starts at 0
+
+            print(new_place.id, new_place.distances)
             places.append(new_place)
-            counter += 1
+            distances_counter += 1
+            place_id += 1
     return places
 
 # keep in mind that the size of the list should be adjusted to the average number of packages if adjusting for another city
@@ -74,8 +80,16 @@ def load_places_hash(place_list, hash_list):
             print("collision detected")  # for determining index insertion method
             hash_list[index].append(place)
 
+def load_distance_graph(place_list):
+    matrix = []
+    list = []
+    for place in place_list:
+        pass
+        # list.append(place.id
+
 packages = load_package_data('./data/package_data.csv')
 places = load_distance_data('./data/distance_data.csv')
+nodes = len(places)
 
 # for place in places:
 #     print(f'Id: {place.id}, Name: {place.name}, Address: {place.address}')
@@ -93,9 +107,9 @@ places = load_distance_data('./data/distance_data.csv')
 #         print(f"Hash Index: {i} is empty.")
 
 # Print places hash
-load_places_hash(places, places_hash)
-for i, bucket in enumerate(places_hash):
-    if bucket is not None:
-        for place in bucket:
-            print(f'in bucket. Index = {i}')
-            print(f'Id: {place.id}, Name: {place.name}, Address: {place.address}')
+# load_places_hash(places, places_hash)
+# for i, bucket in enumerate(places_hash):
+#     if bucket is not None:
+#         for place in bucket:
+#             print(f'in bucket. Index = {i}')
+#             print(f'Id: {place.id}, Name: {place.name}, Address: {place.address}')

@@ -3,3 +3,4 @@ class Place:
         self.id = id
         self.name = name
         self.address = address
+        self.distances = []
