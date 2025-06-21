@@ -1,7 +1,7 @@
 import csv
 from package import Package
 from place import Place
-from christophides import get_all_node_edges, get_mst
+from christophides import get_mst
 
 package_hash = [None] * 35  # Set the size of the hash table to the average number of packages + 5
 places_hash = [None] * 1000

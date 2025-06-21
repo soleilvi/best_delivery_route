@@ -1,18 +1,3 @@
-def get_all_node_edges(place_id, places_list):
-    distances = []  
-    # get the distances stored in the current node
-    for distance in places_list[place_id].distances:
-        distances.append([distance, place_id])
-
-    # get the rest of the distances from the column that corresponds to the ID number of the current node
-    for i in range(place_id + 1, len(places_list)):
-        current_place = places_list[i]
-        # print(current_place.id)  # delete once implemented
-        distances.append([current_place.distances[place_id], place_id])
-
-    return distances
-
-
 # Calculate the minimum spanning tree (MST) using Prim's algorithm
 def get_mst(places_list):
     current_node = 0  # Starting node for the MST
