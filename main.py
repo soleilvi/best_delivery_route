@@ -1,6 +1,7 @@
 import csv
 from package import Package
 from place import Place
+from christophides import get_all_node_edges, get_mst
 
 package_hash = [None] * 35  # Set the size of the hash table to the average number of packages + 5
 places_hash = [None] * 1000
@@ -38,7 +39,7 @@ def load_distance_data(file_path):
             for i in range(distances_counter):
                 new_place.distances.append(row[i + 2])  # + 1 for the row, and another +1 to compensate for the fact that i starts at 0
 
-            print(new_place.id, new_place.distances)
+            # print(new_place.id, new_place.distances)
             places.append(new_place)
             distances_counter += 1
             place_id += 1
@@ -68,7 +69,6 @@ def load_places_hash(place_list, hash_list):
         else:
             key = int(key)
             
-        print(key)
         index = key % len(hash_list)  # Division method for hashing
         
         # Initialize with the place if the bucket is empty
@@ -77,7 +77,7 @@ def load_places_hash(place_list, hash_list):
 
         # Collision handling (chaining)
         else:
-            print("collision detected")  # for determining index insertion method
+            # print("collision detected")  # for determining index insertion method
             hash_list[index].append(place)
 
 def load_distance_graph(place_list):
@@ -89,7 +89,10 @@ def load_distance_graph(place_list):
 
 packages = load_package_data('./data/package_data.csv')
 places = load_distance_data('./data/distance_data.csv')
-nodes = len(places)
+
+# distances = get_all_node_edges(20, places)
+# print(distances)
+print(get_mst(places))
 
 # for place in places:
 #     print(f'Id: {place.id}, Name: {place.name}, Address: {place.address}')
@@ -107,7 +110,6 @@ nodes = len(places)
 #         print(f"Hash Index: {i} is empty.")
 
 # Print places hash
-# load_places_hash(places, places_hash)
 # for i, bucket in enumerate(places_hash):
 #     if bucket is not None:
 #         for place in bucket:
