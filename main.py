@@ -3,9 +3,6 @@ from package import Package
 from place import Place
 from christophides import get_mst
 
-package_hash = [None] * 35  # Set the size of the hash table to the average number of packages + 5
-places_hash = [None] * 1000
-
 def load_package_data(file_path):
     packages = []
 
@@ -80,19 +77,35 @@ def load_places_hash(place_list, hash_list):
             # print("collision detected")  # for determining index insertion method
             hash_list[index].append(place)
 
+# The distance graph needs to be a symmetric graph 
 def load_distance_graph(place_list):
-    matrix = []
-    list = []
+    graph = []
     for place in place_list:
-        pass
-        # list.append(place.id
+        row = [float(distance) for distance in place.distances]
+
+        # Loading the rest of the distances from the column that corresponds to the place ID
+        for destination in place_list[place.id + 1:]:
+            row.append(float(destination.distances[place.id]))
+        graph.append(row)
+    
+    return graph
+
+
+package_hash = [None] * 35  # Set the size of the hash table to the average number of packages + 5
+places_hash = [None] * 1000 
 
 packages = load_package_data('./data/package_data.csv')
 places = load_distance_data('./data/distance_data.csv')
 
+distance_graph = load_distance_graph(places)
+
+print("GRAPH")
+for row in distance_graph:
+    print(row)
+
 # distances = get_all_node_edges(20, places)
 # print(distances)
-print(get_mst(places))
+# print(get_mst(places))
 
 # for place in places:
 #     print(f'Id: {place.id}, Name: {place.name}, Address: {place.address}')
