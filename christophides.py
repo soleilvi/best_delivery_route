@@ -1,4 +1,5 @@
 # Calculate the minimum spanning tree (MST) using Prim's algorithm
+# TODO: implement graph
 def get_mst(places_list):
     current_node = 0  # Starting node for the MST
     visited_nodes = [False] * len(places_list)  # Each index in the list represents a different place. Once it is visited, it turns into True.
@@ -18,7 +19,7 @@ def get_mst(places_list):
                 possible_paths.append([float(places_list[i].distances[current_node]), current_node, i])
 
         possible_paths.sort(reverse=True, key=lambda sub_list: sub_list[0])  # sorting from greatest distance to smallest according to the first element (edge weight) of each sub-list
-        print(possible_paths)
+        # print(possible_paths)
 
         destination = possible_paths[-1][2]
         is_new_node = False  # the destination is a node in visited_nodes
@@ -41,5 +42,46 @@ def get_mst(places_list):
     return mst
 
 # find the minimum weight perfect matching 
-def get_mpm():
-    pass
+def get_mpm(node_graph, distance_graph):
+    uneven_nodes = set()  # Holds nodes that have uneven edges connecting to them
+    bijection = []
+    node_distances = []
+
+    # 1) Identify nodes with odd-degree edges 
+    for row in node_graph:
+        # Only repeats twice
+        for node in row:
+            if node not in uneven_nodes:
+                uneven_nodes.add(node)
+            else:
+                uneven_nodes.remove(node)
+
+    # 2) Get distances of each of those nodes
+    for node in uneven_nodes:
+        for i, distance in enumerate(distance_graph[node]):
+            if i in uneven_nodes and distance != 0.0:
+                node_distances.append((distance, node, i))
+
+    node_distances.sort(reverse=True, key=lambda tuple: tuple[0])
+    print(node_distances)
+
+    # 3) Match nodes according to the minimum distance between them
+    while uneven_nodes:
+        distance = node_distances[-1][0]
+        start_node = node_distances[-1][1]
+        end_node = node_distances[-1][2]
+    
+        # Do not match nodes we already have to satisfy 
+        if start_node in uneven_nodes and end_node in uneven_nodes:
+            print(f'Distance ({distance}) between {start_node} and {end_node}')
+            bijection.append((distance, start_node, end_node))
+            uneven_nodes.remove(start_node)
+            uneven_nodes.remove(end_node)
+            print(uneven_nodes)
+        
+        # Two pops because the node distances are repeated
+        node_distances.pop()
+        node_distances.pop()
+
+    return bijection
+

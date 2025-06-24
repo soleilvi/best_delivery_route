@@ -1,7 +1,7 @@
 import csv
 from package import Package
 from place import Place
-from christophides import get_mst
+from christophides import get_mst, get_mpm
 
 def load_package_data(file_path):
     packages = []
@@ -99,13 +99,14 @@ places = load_distance_data('./data/distance_data.csv')
 
 distance_graph = load_distance_graph(places)
 
-print("GRAPH")
-for row in distance_graph:
-    print(row)
+# print("GRAPH")
+# for row in distance_graph:
+#     print(row)
 
-# distances = get_all_node_edges(20, places)
-# print(distances)
-# print(get_mst(places))
+mst = get_mst(places)
+mpm = get_mpm(mst, distance_graph)
+# print(mst)
+print(mpm)
 
 # for place in places:
 #     print(f'Id: {place.id}, Name: {place.name}, Address: {place.address}')
