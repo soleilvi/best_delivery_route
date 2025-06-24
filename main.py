@@ -105,10 +105,18 @@ distance_graph = load_distance_graph(places)
 
 mst = get_mst(places)
 mpm = get_mpm(mst, distance_graph)
+merged = merge_graphs(mst, mpm)
+
+mst.sort()
+mpm.sort()
+merged.sort()
+
 print(mst)
+print(f"mst size: {len(mst)}")
 print(mpm)
-# merged = merge_graphs(mst, mpm)
-# print(merged)
+print(f"mpm size: {len(mpm)}")
+print(merged)
+print(f"merged size: {len(merged)}")
 
 # for place in places:
 #     print(f'Id: {place.id}, Name: {place.name}, Address: {place.address}')

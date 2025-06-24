@@ -98,17 +98,24 @@ def merge_graphs(long_graph, short_graph):
     # ok sure, but how about ones that are switched around?
     # merged_graph.add(item for item in long_graph)
     # merged_graph.add(item for item in short_graph)
-    for node_list in long_graph:
-        merged_graph.add(node_list)
+    for node_pair in long_graph:
+        merged_graph.add(node_pair)
+    for node_pair in short_graph:
+        a = node_pair[0]
+        b = node_pair[1]
 
-    # Getting rid of repeats
-    merged_copy = merged_graph.copy()
-    for item in merged_graph:
-        print(item)
-        # a = item[0]
-        # b = item[1]
+        if (b, a) not in merged_graph:
+            merged_graph.add(node_pair)
+        
 
-        # if [b, a] in merged_graph:
-        #     merged_graph.delete([b, a])
+    # # Getting rid of repeats
+    # merged_copy = merged_graph.copy()
+    # for item in merged_graph:
+    #     print(item)
+    #     a = item[0]
+    #     b = item[1]
+
+    #     if [b, a] in merged_graph:
+    #         merged_graph.delete([b, a])
 
     return list(merged_graph)
