@@ -60,24 +60,24 @@ def get_mpm(node_graph, distance_graph):
     for node in uneven_nodes:
         for i, distance in enumerate(distance_graph[node]):
             if i in uneven_nodes and distance != 0.0:
-                node_distances.append((distance, node, i))
+                node_distances.append([distance, node, i])
 
     node_distances.sort(reverse=True, key=lambda tuple: tuple[0])
-    print(node_distances)
+    # print(node_distances)
 
     # 3) Match nodes according to the minimum distance between them
     while uneven_nodes:
-        distance = node_distances[-1][0]
+        # distance = node_distances[-1][0]
         start_node = node_distances[-1][1]
         end_node = node_distances[-1][2]
     
         # Do not match nodes we already have to satisfy 
         if start_node in uneven_nodes and end_node in uneven_nodes:
-            print(f'Distance ({distance}) between {start_node} and {end_node}')
-            bijection.append((distance, start_node, end_node))
+            # print(f'Distance ({distance}) between {start_node} and {end_node}')
+            bijection.append([start_node, end_node])
             uneven_nodes.remove(start_node)
             uneven_nodes.remove(end_node)
-            print(uneven_nodes)
+            # print(uneven_nodes)
         
         # Two pops because the node distances are repeated
         node_distances.pop()
@@ -85,3 +85,6 @@ def get_mpm(node_graph, distance_graph):
 
     return bijection
 
+# Merge the MST and MPM
+def merge_graphs(graph1, graph2):
+    pass

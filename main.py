@@ -105,7 +105,7 @@ distance_graph = load_distance_graph(places)
 
 mst = get_mst(places)
 mpm = get_mpm(mst, distance_graph)
-# print(mst)
+print(mst)
 print(mpm)
 
 # for place in places:
