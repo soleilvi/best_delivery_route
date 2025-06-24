@@ -89,33 +89,20 @@ def get_mpm(node_graph, distance_graph):
 def merge_graphs(long_graph, short_graph):
     merged_graph = set()
 
-    # # In case the graphs are accidentally switched around 
-    # if len(long_graph) < len(short_graph):
-    #     placeholder = long_graph
-    #     long_graph = short_graph
-    #     short_graph = placeholder
+    # In case the graphs are accidentally switched around 
+    if len(long_graph) < len(short_graph):
+        placeholder = long_graph
+        long_graph = short_graph
+        short_graph = placeholder
 
-    # ok sure, but how about ones that are switched around?
-    # merged_graph.add(item for item in long_graph)
-    # merged_graph.add(item for item in short_graph)
     for node_pair in long_graph:
         merged_graph.add(node_pair)
     for node_pair in short_graph:
         a = node_pair[0]
         b = node_pair[1]
 
+        # Prevents duplicate edges that have the nodes switched around
         if (b, a) not in merged_graph:
             merged_graph.add(node_pair)
         
-
-    # # Getting rid of repeats
-    # merged_copy = merged_graph.copy()
-    # for item in merged_graph:
-    #     print(item)
-    #     a = item[0]
-    #     b = item[1]
-
-    #     if [b, a] in merged_graph:
-    #         merged_graph.delete([b, a])
-
     return list(merged_graph)
