@@ -12,11 +12,11 @@ def get_mst(places_list):
         # get the distances stored in the current node
         for i, distance in enumerate(places_list[current_node].distances):
             if visited_nodes[i] is False:  # optimize algorithm a bit by excluding paths to nodes we have already visited 
-                possible_paths.append([float(distance), current_node, i])
+                possible_paths.append((float(distance), current_node, i))
         # get the rest of the distances from the column that corresponds to the ID number of the current node
         for i in range(current_node + 1, len(places_list)):
             if visited_nodes[i] is False:
-                possible_paths.append([float(places_list[i].distances[current_node]), current_node, i])
+                possible_paths.append((float(places_list[i].distances[current_node]), current_node, i))
 
         possible_paths.sort(reverse=True, key=lambda sub_list: sub_list[0])  # sorting from greatest distance to smallest according to the first element (edge weight) of each sub-list
         # print(possible_paths)
@@ -26,7 +26,7 @@ def get_mst(places_list):
         while not is_new_node:
             # if the node we are visiting is not already in the MST graph
             if visited_nodes[destination] is False:
-                mst.append([possible_paths[-1][1], destination])
+                mst.append((possible_paths[-1][1], destination))
                 current_node = destination
                 possible_paths.pop()
                 is_new_node = True 
@@ -60,7 +60,7 @@ def get_mpm(node_graph, distance_graph):
     for node in uneven_nodes:
         for i, distance in enumerate(distance_graph[node]):
             if i in uneven_nodes and distance != 0.0:
-                node_distances.append([distance, node, i])
+                node_distances.append((distance, node, i))
 
     node_distances.sort(reverse=True, key=lambda tuple: tuple[0])
     # print(node_distances)
@@ -74,7 +74,7 @@ def get_mpm(node_graph, distance_graph):
         # Do not match nodes we already have to satisfy 
         if start_node in uneven_nodes and end_node in uneven_nodes:
             # print(f'Distance ({distance}) between {start_node} and {end_node}')
-            bijection.append([start_node, end_node])
+            bijection.append((start_node, end_node))
             uneven_nodes.remove(start_node)
             uneven_nodes.remove(end_node)
             # print(uneven_nodes)
@@ -86,5 +86,29 @@ def get_mpm(node_graph, distance_graph):
     return bijection
 
 # Merge the MST and MPM
-def merge_graphs(graph1, graph2):
-    pass
+def merge_graphs(long_graph, short_graph):
+    merged_graph = set()
+
+    # # In case the graphs are accidentally switched around 
+    # if len(long_graph) < len(short_graph):
+    #     placeholder = long_graph
+    #     long_graph = short_graph
+    #     short_graph = placeholder
+
+    # ok sure, but how about ones that are switched around?
+    # merged_graph.add(item for item in long_graph)
+    # merged_graph.add(item for item in short_graph)
+    for node_list in long_graph:
+        merged_graph.add(node_list)
+
+    # Getting rid of repeats
+    merged_copy = merged_graph.copy()
+    for item in merged_graph:
+        print(item)
+        # a = item[0]
+        # b = item[1]
+
+        # if [b, a] in merged_graph:
+        #     merged_graph.delete([b, a])
+
+    return list(merged_graph)

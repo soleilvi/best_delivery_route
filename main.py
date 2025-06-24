@@ -1,7 +1,7 @@
 import csv
 from package import Package
 from place import Place
-from christophides import get_mst, get_mpm
+from christophides import *
 
 def load_package_data(file_path):
     packages = []
@@ -107,6 +107,8 @@ mst = get_mst(places)
 mpm = get_mpm(mst, distance_graph)
 print(mst)
 print(mpm)
+# merged = merge_graphs(mst, mpm)
+# print(merged)
 
 # for place in places:
 #     print(f'Id: {place.id}, Name: {place.name}, Address: {place.address}')
