@@ -127,7 +127,7 @@ def is_disjoint(node_connection_dict, current_node, complete_node_count):
         current_node = unvisited_nodes.pop()
 
     #DELETE
-    print(f"nodes in graph: {visited_nodes}, full node count: {complete_node_count}")
+    print(f"nodes in graph: {visited_nodes}, current graph count: {len(visited_nodes)}, OG graph count: 27")
 
     return len(visited_nodes) != complete_node_count
 
@@ -228,8 +228,8 @@ def simplify_edges(distance_graph, eulerian_graph):
 
             start_node = destination_node_distances[-1][1]
             end_node = destination_node_distances[-1][2]
-            original_paths["start"] = node_connections[start_node]
-            original_paths["end"] = node_connections[end_node]
+            original_paths["start"] = node_connections[start_node].copy()
+            original_paths["end"] = node_connections[end_node].copy()
             print(f"node: {node}, start_node: {start_node}, end_node: {end_node}")
             print(f"CONNECTIONS BEFORE: node: {node_connections[node]}, start_node: {node_connections[start_node]}, end_node: {node_connections[end_node]}")
 
