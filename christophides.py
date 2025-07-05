@@ -112,32 +112,24 @@ def merge_graphs(long_graph, short_graph):
 
 # For making the hamiltonian tour
 def is_disjoint(node_connection_dict, current_node, complete_node_count):
-    nodes_in_graph = {current_node}
-    circuit_completed = False
-    next_node = -1
-    connecting_nodes_in_graph = 0
+    visited_nodes = set()
+    unvisited_nodes = node_connection_dict[current_node].copy()  # stack
+    
+    while unvisited_nodes:
+        if current_node in visited_nodes:
+            pass
+        else:
+            for destination in node_connection_dict[current_node]:
+                if destination not in visited_nodes:
+                    unvisited_nodes.append(destination)
 
-    while not circuit_completed:
-        for connecting_node in node_connection_dict[current_node]:
-            # delete once finished
-            # print(f"current node: {current_node}, connecting node: {connecting_node}, next node: {next_node}")
-            # print(nodes_in_graph)
-            
-            if connecting_node in nodes_in_graph:
-                connecting_nodes_in_graph += 1
-            else:
-                next_node = connecting_node
+        visited_nodes.add(current_node)
+        current_node = unvisited_nodes.pop()
 
-            # We have visited both nodes, which means that it's a complete circuit
-            if connecting_nodes_in_graph == len(node_connection_dict[current_node]):
-                circuit_completed = True
-                break
+    #DELETE
+    print(f"nodes in graph: {visited_nodes}, full node count: {complete_node_count}")
 
-            nodes_in_graph.add(connecting_node)
-        current_node = next_node
-        connecting_nodes_in_graph = 0
-
-    return len(nodes_in_graph) != complete_node_count
+    return len(visited_nodes) != complete_node_count
 
 
 # Make a hamiltonian tour out of the Eulerian tour
@@ -154,64 +146,105 @@ def simplify_edges(distance_graph, eulerian_graph):
         b = node_pair[1]
 
         if a in node_connections:
-            node_connections[a].add(b)
+            node_connections[a].append(b)
             if len(node_connections[a]) > 2: 
                 nodes_over_two_edges.add(a)
 
         # Initialize the node in the dictionary 
         else:
-            node_connections[a] = {b}
+            node_connections[a] = [b]
 
         # a and b not being in the dictionary are not mutually exclusive events
         if b in node_connections:
-            node_connections[b].add(a)
+            node_connections[b].append(a)
             if len(node_connections[b]) > 2: 
                 nodes_over_two_edges.add(b)
         else:
-            node_connections[b] = {a}
+            node_connections[b] = [a]
+
+    print(f"nodes over two edges: {nodes_over_two_edges}")
 
     # 2) Get the distances between all the destination nodes
     new_paths = []
     while nodes_over_two_edges:
         node = nodes_over_two_edges.pop()
-        # node_edges = []
-        min_distance = 100000  # arbitrarily large number that I doubt a city could contain in miles
-        path = None
+        destination_nodes = node_connections[node]
+        destination_node_distances = []
+        n = len(destination_nodes)
+        i = n - 1
 
-        # Getting the distances from the distance graph according to the intersection between the node and the destination node
-        for start_node in node_connections[node]:
-            for end_node in node_connections[node]:
-                distance = distance_graph[start_node][end_node]
-                if start_node != end_node:
-                    # Connect the minimum distance and prevent selecting an already existing connection
-                    if distance < min_distance and end_node not in node_connections[start_node]:
-                        min_distance = distance
-                        path = (start_node, end_node)
+        print(f"current node: {node}")
 
-        # # delete
-        print(f"node: {node}")
-        # print(min_distance)
-        # print(distance_graph[node])
-
-        # 3) Replace [(n, x), (n, y)] with [(x, y)]
-        # Reconnecting node 1
-        node_connections[path[0]].remove(node)
-        node_connections[path[0]].add(path[1])
-
-        # Reconnecting node 2
-        node_connections[path[1]].remove(node)
-        node_connections[path[1]].add(path[0])
-
-        # Removing node 1 and 2 from the current node's destination list
-        node_connections[node].remove(path[0])
-        node_connections[node].remove(path[1])
-
-        new_paths.append(path)  # For the final graph
 
         # printing dict, delete once done
-        for key in node_connections:
-            print(f"key: {key}, end points: {node_connections[key]}")
-        print(nodes_over_two_edges)
+        # for key in node_connections:
+        #     print(f"key: {key}, end points: {node_connections[key]}")
+        # print(nodes_over_two_edges)
+
+        # Getting the distance between each destination node 
+        for start_node in destination_nodes:
+            # Prevent revisiting the same path several times and make runtime slightly faster with [(n-i):]
+            for end_node in destination_nodes[(n-i):]:
+                # print(f"start node: {start_node}, end node: {end_node}")
+                destination_node_distances.append((distance_graph[start_node][end_node], start_node, end_node))  # Distance between start and end nodes
+            i -= 1
+
+        destination_node_distances.sort(reverse=True, key=lambda sub_list: sub_list[0])
+
+        # delete
+        # print(f"destination distances: {destination_node_distances}")
+
+        # 3) Replace [(n, x), (n, y)] with [(x, y)]
+        start_node = destination_node_distances[-1][1]
+        end_node = destination_node_distances[-1][2]
+        print(f"(out) node: {node}, start_node: {start_node}, end_node: {end_node}")
+        original_paths = {"node": node_connections[node].copy(), "start": node_connections[start_node].copy(), "end": node_connections[end_node].copy()}
+        
+        # Reconnecting node 1
+        node_connections[start_node].remove(node)
+        node_connections[start_node].append(end_node)
+
+        # Reconnecting node 2
+        node_connections[end_node].remove(node)
+        node_connections[end_node].append(start_node)
+
+        # Removing node 1 and 2 from the current node's destination list
+        node_connections[node].remove(start_node)
+        node_connections[node].remove(end_node)
+
+        print(node_connections[start_node])
+        print(node_connections[end_node])
+
+        # of course it's going to be disjoint, it's not getting repaired >:(
+        while is_disjoint(node_connections, start_node, len(distance_graph)):
+            node_connections[node] = original_paths["node"].copy()
+            node_connections[start_node] = original_paths["start"].copy()
+            node_connections[end_node] = original_paths["end"].copy()
+
+            destination_node_distances.pop()
+
+            #delete
+            print(f"path: {destination_node_distances[-1]}")
+
+            start_node = destination_node_distances[-1][1]
+            end_node = destination_node_distances[-1][2]
+            original_paths["start"] = node_connections[start_node]
+            original_paths["end"] = node_connections[end_node]
+            print(f"node: {node}, start_node: {start_node}, end_node: {end_node}")
+            print(f"CONNECTIONS BEFORE: node: {node_connections[node]}, start_node: {node_connections[start_node]}, end_node: {node_connections[end_node]}")
+
+            node_connections[start_node].remove(node)
+            node_connections[start_node].append(end_node)
+
+            node_connections[end_node].remove(node)
+            node_connections[end_node].append(start_node)
+
+            node_connections[node].remove(start_node)
+            node_connections[node].remove(end_node)
+
+            print(f"CONNECTIONS AFTER: node: {node_connections[node]}, start_node: {node_connections[start_node]}, end_node: {node_connections[end_node]}")
+
+        new_paths.append(destination_node_distances[-1])  # For the final graph
                 
         # 5) Repeat until the current start node only has two distances (add the node to the set again if the length is still over 2)
         if len(node_connections[node]) > 2:
