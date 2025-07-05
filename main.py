@@ -91,6 +91,14 @@ def load_distance_graph(place_list):
     return graph
 
 
+def testing(dict, x, y):
+    dict[x] = 1
+    dict[y] = 2
+
+pee = {"one": 0, "two": 30}
+testing(pee, "one", "two")
+print(pee)
+
 package_hash = [None] * 35  # Set the size of the hash table to the average number of packages + 5
 places_hash = [None] * 1000 
 

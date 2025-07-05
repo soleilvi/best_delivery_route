@@ -132,6 +132,20 @@ def is_disjoint(node_connection_dict, current_node, complete_node_count):
     return len(visited_nodes) != complete_node_count
 
 
+# For nodes that have more than two connections, we want to replace [(n, x), (n, y)] with [(x, y)]
+def reconnect_nodes(node_connection_dict, n, x, y):
+    node_connection_dict[x].remove(n)
+    node_connection_dict[x].append(y)
+
+    node_connection_dict[y].remove(n)
+    node_connection_dict[y].append(x)
+
+    node_connection_dict[n].remove(x)
+    node_connection_dict[n].remove(y)
+
+    #return???
+
+
 # Make a hamiltonian tour out of the Eulerian tour
 def simplify_edges(distance_graph, eulerian_graph):
     # Dictionary instead of a 2D array since reading the nodes won't be in order -> rows are not in the correct order 
@@ -199,18 +213,8 @@ def simplify_edges(distance_graph, eulerian_graph):
         end_node = destination_node_distances[-1][2]
         print(f"(out) node: {node}, start_node: {start_node}, end_node: {end_node}")
         original_paths = {"node": node_connections[node].copy(), "start": node_connections[start_node].copy(), "end": node_connections[end_node].copy()}
-        
-        # Reconnecting node 1
-        node_connections[start_node].remove(node)
-        node_connections[start_node].append(end_node)
 
-        # Reconnecting node 2
-        node_connections[end_node].remove(node)
-        node_connections[end_node].append(start_node)
-
-        # Removing node 1 and 2 from the current node's destination list
-        node_connections[node].remove(start_node)
-        node_connections[node].remove(end_node)
+        reconnect_nodes(node_connections, node, start_node, end_node)
 
         print(node_connections[start_node])
         print(node_connections[end_node])
@@ -230,18 +234,14 @@ def simplify_edges(distance_graph, eulerian_graph):
             end_node = destination_node_distances[-1][2]
             original_paths["start"] = node_connections[start_node].copy()
             original_paths["end"] = node_connections[end_node].copy()
+
+            # delete
             print(f"node: {node}, start_node: {start_node}, end_node: {end_node}")
             print(f"CONNECTIONS BEFORE: node: {node_connections[node]}, start_node: {node_connections[start_node]}, end_node: {node_connections[end_node]}")
 
-            node_connections[start_node].remove(node)
-            node_connections[start_node].append(end_node)
+            reconnect_nodes(node_connections, node, start_node, end_node)
 
-            node_connections[end_node].remove(node)
-            node_connections[end_node].append(start_node)
-
-            node_connections[node].remove(start_node)
-            node_connections[node].remove(end_node)
-
+            # delete
             print(f"CONNECTIONS AFTER: node: {node_connections[node]}, start_node: {node_connections[start_node]}, end_node: {node_connections[end_node]}")
 
         new_paths.append(destination_node_distances[-1])  # For the final graph
