@@ -91,14 +91,6 @@ def load_distance_graph(place_list):
     return graph
 
 
-def testing(dict, x, y):
-    dict[x] = 1
-    dict[y] = 2
-
-pee = {"one": 0, "two": 30}
-testing(pee, "one", "two")
-print(pee)
-
 package_hash = [None] * 35  # Set the size of the hash table to the average number of packages + 5
 places_hash = [None] * 1000 
 
@@ -111,7 +103,7 @@ distance_graph = load_distance_graph(places)
 # for row in distance_graph:
 #     print(row)
 
-mst = get_mst(places)
+mst = get_mst(len(places), distance_graph)
 mpm = get_mpm(mst, distance_graph)
 merged = merge_graphs(mst, mpm)
 
@@ -121,12 +113,12 @@ merged = merge_graphs(mst, mpm)
 
 print(mst)
 print(f"mst size: {len(mst)}")
-print(mpm)
-print(f"mpm size: {len(mpm)}")
-print(merged)
-print(f"merged size: {len(merged)}")
+# print(mpm)
+# print(f"mpm size: {len(mpm)}")
+# print(merged)
+# print(f"merged size: {len(merged)}")
 
-final = simplify_edges(distance_graph, merged)
+# final = simplify_edges(distance_graph, merged)
 
 # for place in places:
 #     print(f'Id: {place.id}, Name: {place.name}, Address: {place.address}')

@@ -1,24 +1,22 @@
+# TODO: you have to sort the distances so often...would it be better to simply sort the distance graph? That would make it unable to retrieve distances in constant time. Maybe another one, then..?
+
 # Calculate the minimum spanning tree (MST) using Prim's algorithm
-# TODO: implement graph
-def get_mst(places_list):
+def get_mst(nodes_in_graph, distance_graph):
     current_node = 0  # Starting node for the MST
-    visited_nodes = [False] * len(places_list)  # Each index in the list represents a different place. Once it is visited, it turns into True.
+    visited_nodes = [False] * nodes_in_graph  # Each index in the list represents a different place. Once it is visited, it turns into True.
     possible_paths = []
     mst = []
 
-    while len(mst) < len(places_list) - 1:  # while mst is not full 
+    # while mst is not full 
+    while len(mst) < nodes_in_graph - 1:
         visited_nodes[current_node] = True
 
         # get the distances stored in the current node
-        for i, distance in enumerate(places_list[current_node].distances):
-            if visited_nodes[i] is False:  # optimize algorithm a bit by excluding paths to nodes we have already visited 
-                possible_paths.append((float(distance), current_node, i))
-        # get the rest of the distances from the column that corresponds to the ID number of the current node
-        for i in range(current_node + 1, len(places_list)):
-            if visited_nodes[i] is False:
-                possible_paths.append((float(places_list[i].distances[current_node]), current_node, i))
+        for i, distance in enumerate(distance_graph[current_node]):
+            possible_paths.append([distance, current_node, i])
 
         possible_paths.sort(reverse=True, key=lambda sub_list: sub_list[0])  # sorting from greatest distance to smallest according to the first element (edge weight) of each sub-list
+        # delete
         # print(possible_paths)
 
         destination = possible_paths[-1][2]
@@ -36,6 +34,7 @@ def get_mst(places_list):
                 possible_paths.pop()
                 destination = possible_paths[-1][2]
         
+        #delete
         # print(f'mst after: {mst}')
         # print(f'current node: {current_node}')
 
@@ -143,10 +142,9 @@ def reconnect_nodes(node_connection_dict, n, x, y):
     node_connection_dict[n].remove(x)
     node_connection_dict[n].remove(y)
 
-    #return???
-
 
 # Make a hamiltonian tour out of the Eulerian tour
+#TODO see if you can make it work without having to copy the list constantly 
 def simplify_edges(distance_graph, eulerian_graph):
     # Dictionary instead of a 2D array since reading the nodes won't be in order -> rows are not in the correct order 
     # Will have the 26 entries in it
