@@ -104,8 +104,8 @@ distance_graph = load_distance_graph(places)
 #     print(row)
 
 mst = get_mst(len(places), distance_graph)
-mpm = get_mpm(mst, distance_graph)
-merged = merge_graphs(mst, mpm)
+# mpm = get_mpm(mst, distance_graph)
+# merged = merge_graphs(mst, mpm)
 
 # mst.sort()
 # mpm.sort()

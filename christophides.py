@@ -1,4 +1,8 @@
+import heapq
+
 # TODO: you have to sort the distances so often...would it be better to simply sort the distance graph? That would make it unable to retrieve distances in constant time. Maybe another one, then..?
+# TODO: Maybe also instead of sort(), you could use heapify() (O(n) instead of O(nlogn))
+# TODO: also change stuff from a 2D list to a dictionary (oh maybe not, I need a priority queue for Prim's, anyway)
 
 # Calculate the minimum spanning tree (MST) using Prim's algorithm
 def get_mst(nodes_in_graph, distance_graph):
@@ -13,28 +17,38 @@ def get_mst(nodes_in_graph, distance_graph):
 
         # get the distances stored in the current node
         for i, distance in enumerate(distance_graph[current_node]):
-            possible_paths.append([distance, current_node, i])
+            # do not add distances of 0.0
+            if distance != 0:
+                possible_paths.append([distance, current_node, i])
 
-        possible_paths.sort(reverse=True, key=lambda sub_list: sub_list[0])  # sorting from greatest distance to smallest according to the first element (edge weight) of each sub-list
-        # delete
+        heapq.heapify(possible_paths)  # the first element will always contain the smallest element
+        # # delete
+        # print("HEAP:")
         # print(possible_paths)
+        # print("LAST ELEMENT:")
+        # print(possible_paths[0])
 
-        destination = possible_paths[-1][2]
+        origin = possible_paths[0][1]
+        destination = possible_paths[0][2]
         is_new_node = False  # the destination is a node in visited_nodes
         while not is_new_node:
             # if the node we are visiting is not already in the MST graph
             if visited_nodes[destination] is False:
-                mst.append((possible_paths[-1][1], destination))
+                mst.append([origin, destination])
                 current_node = destination
-                possible_paths.pop()
+                heapq.heappop(possible_paths)
                 is_new_node = True 
                 
             # if the node we are visiting has already been visited 
             else:
-                possible_paths.pop()
-                destination = possible_paths[-1][2]
+                print(f"Removing {possible_paths[0]}")
+                heapq.heappop(possible_paths)
+                destination = possible_paths[0][2]
+                origin = possible_paths[0][1]
+
+            print(f"Heap after the fucking thingy: {possible_paths}")
         
-        #delete
+        # # delete
         # print(f'mst after: {mst}')
         # print(f'current node: {current_node}')
 
@@ -145,6 +159,7 @@ def reconnect_nodes(node_connection_dict, n, x, y):
 
 # Make a hamiltonian tour out of the Eulerian tour
 #TODO see if you can make it work without having to copy the list constantly 
+#TODO return graph (dictionary)
 def simplify_edges(distance_graph, eulerian_graph):
     # Dictionary instead of a 2D array since reading the nodes won't be in order -> rows are not in the correct order 
     # Will have the 26 entries in it
@@ -249,3 +264,12 @@ def simplify_edges(distance_graph, eulerian_graph):
             nodes_over_two_edges.add(node)
 
     print(is_disjoint(node_connections, 10, len(distance_graph)))
+
+    # TODO: this
+    # Copy and paste the code in is_disjoint and just return the total distance idfk, I actually don't know what the purpose of this one is.
+    def traverse_graph():
+        pass
+
+
+    def christophides():
+        pass
