@@ -22,11 +22,6 @@ def get_mst(nodes_in_graph, distance_graph):
                 possible_paths.append([distance, current_node, i])
 
         heapq.heapify(possible_paths)  # the first element will always contain the smallest element
-        # # delete
-        # print("HEAP:")
-        # print(possible_paths)
-        # print("LAST ELEMENT:")
-        # print(possible_paths[0])
 
         origin = possible_paths[0][1]
         destination = possible_paths[0][2]
@@ -41,17 +36,10 @@ def get_mst(nodes_in_graph, distance_graph):
                 
             # if the node we are visiting has already been visited 
             else:
-                print(f"Removing {possible_paths[0]}")
                 heapq.heappop(possible_paths)
                 destination = possible_paths[0][2]
                 origin = possible_paths[0][1]
-
-            print(f"Heap after the fucking thingy: {possible_paths}")
         
-        # # delete
-        # print(f'mst after: {mst}')
-        # print(f'current node: {current_node}')
-
     return mst
 
 
