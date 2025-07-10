@@ -3,21 +3,23 @@ import heapq
 # TODO: you have to sort the distances so often...would it be better to simply sort the distance graph? That would make it unable to retrieve distances in constant time. Maybe another one, then..?
 # TODO: Maybe also instead of sort(), you could use heapify() (O(n) instead of O(nlogn))
 # TODO: also change stuff from a 2D list to a dictionary (oh maybe not, I need a priority queue for Prim's, anyway)
+# ^^ would it be good to make a dictionary that includes the distance as well as the node...?
 
 # Calculate the minimum spanning tree (MST) using Prim's algorithm
 def get_mst(nodes_in_graph, distance_graph):
     current_node = 0  # Starting node for the MST
-    visited_nodes = [False] * nodes_in_graph  # Each index in the list represents a different place. Once it is visited, it turns into True.
+    visited_nodes = set()
     possible_paths = []
-    mst = []
+    mst = {i:[] for i in range(nodes_in_graph)}  # An MST includes all the nodes in the graph. Initialize all the nodes in a dictionary without any connections.
 
-    # while mst is not full 
-    while len(mst) < nodes_in_graph - 1:
-        visited_nodes[current_node] = True
+    # while we have not connected all the nodes
+    while len(visited_nodes) < nodes_in_graph - 1:
+        # visited_nodes[current_node] = True
+        visited_nodes.add(current_node)
 
         # get the distances stored in the current node
         for i, distance in enumerate(distance_graph[current_node]):
-            # do not add distances of 0.0
+            # do not add nodes connected to themselves or without paths
             if distance != 0:
                 possible_paths.append([distance, current_node, i])
 
@@ -25,20 +27,17 @@ def get_mst(nodes_in_graph, distance_graph):
 
         origin = possible_paths[0][1]
         destination = possible_paths[0][2]
-        is_new_node = False  # the destination is a node in visited_nodes
-        while not is_new_node:
-            # if the node we are visiting is not already in the MST graph
-            if visited_nodes[destination] is False:
-                mst.append([origin, destination])
-                current_node = destination
-                heapq.heappop(possible_paths)
-                is_new_node = True 
-                
-            # if the node we are visiting has already been visited 
-            else:
-                heapq.heappop(possible_paths)
-                destination = possible_paths[0][2]
-                origin = possible_paths[0][1]
+        while destination in visited_nodes:
+            heapq.heappop(possible_paths)
+            origin = possible_paths[0][1]
+            destination = possible_paths[0][2]
+        
+        # draw a path between the two nodes that can be accessed through either of them
+        mst[origin].append(destination)
+        mst[destination].append(origin)
+
+        current_node = destination
+        heapq.heappop(possible_paths)
         
     return mst
 
@@ -50,6 +49,7 @@ def get_mpm(node_graph, distance_graph):
     node_distances = []
 
     # 1) Identify nodes with odd-degree edges 
+    # with tuple list (O(n^2))
     for row in node_graph:
         # Only repeats twice
         for node in row:
@@ -58,13 +58,23 @@ def get_mpm(node_graph, distance_graph):
             else:
                 uneven_nodes.remove(node)
 
+    # # with dict it's O(n):
+    # for node in node_graph:
+    #     if len(node_graph[node]) % 2 == 1:
+    #         uneven_nodes.add(node)
+
     # 2) Get distances of each of those nodes
     for node in uneven_nodes:
         for i, distance in enumerate(distance_graph[node]):
             if i in uneven_nodes and distance != 0.0:
                 node_distances.append((distance, node, i))
+    # # with dict
+    # for node in uneven_nodes:
+    #     for destination in node_graph[node]:
+    #         node_distances.append((distance_graph[node][destination], node, destination))
 
     node_distances.sort(reverse=True, key=lambda tuple: tuple[0])
+    # heapq.heapify(node_distances)
     # print(node_distances)
 
     # 3) Match nodes according to the minimum distance between them
