@@ -103,29 +103,10 @@ distance_graph = load_distance_graph(places)
 # for row in distance_graph:
 #     print(row)
 
-mst = get_mst(len(places), distance_graph)
-mpm = get_mpm(mst, distance_graph)
-merged = merge_graphs(mst, mpm)
-
-# mst.sort()
-# mpm.sort()
-# merged.sort()
-
-print("MST")
-print(mst)
-print(f"mst size: {len(mst)}")
-print("MPM")
-print(mpm)
-print(f"mpm size: {len(mpm)}")
-print("MERGED")
-for node in merged:
-    print(f"{node}: {merged[node]}")
-print(f"merged size: {len(merged)}")
-
-final = simplify_edges(distance_graph, merged)
-print("FINAL")
-for node in final:
-    print(f"{node}: {final[node]}")
+chris= christophides(len(places), distance_graph)
+print("CHRISTOPHIDES")
+for node in chris:
+    print(f"{node}: {chris[node]}")
 
 # for place in places:
 #     print(f'Id: {place.id}, Name: {place.name}, Address: {place.address}')

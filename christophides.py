@@ -185,5 +185,10 @@ def traverse_graph():
     pass
 
 
-def christophides():
-    pass
+def christophides(node_number, distance_graph):
+    mst = get_mst(node_number, distance_graph)
+    mpm = get_mpm(mst, distance_graph)
+    eulerian = merge_graphs(mst, mpm)
+    best_path = simplify_edges(distance_graph, eulerian)
+
+    return best_path
