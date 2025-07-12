@@ -1,18 +1,16 @@
 import heapq
 
-# TODO: you have to sort the distances so often...would it be better to simply sort the distance graph? That would make it unable to retrieve distances in constant time. Maybe another one, then..?
-# TODO: Maybe also instead of sort(), you could use heapify() (O(n) instead of O(nlogn))
-# TODO: also change stuff from a 2D list to a dictionary (oh maybe not, I need a priority queue for Prim's, anyway)
-# ^^ would it be good to make a dictionary that includes the distance as well as the node...?
+# TODO: would it be good to make a dictionary that includes the distance as well as the node...?
 
 # Calculate the minimum spanning tree (MST) using Prim's algorithm
+#TODO: initialize the mst with the correct node IDs. The graph will not necessarily have nodes in sequential number.
 def get_mst(nodes_in_graph, distance_graph):
     current_node = 0  # Starting node for the MST
     visited_nodes = set()
     possible_paths = []
     mst = {i:[] for i in range(nodes_in_graph)}  # An MST includes all the nodes in the graph. Initialize all the nodes in a dictionary without any connections.
 
-    # while we have not connected all the nodes
+    # while we don't have connections between all the nodes
     while len(visited_nodes) < nodes_in_graph - 1:
         # visited_nodes[current_node] = True
         visited_nodes.add(current_node)
