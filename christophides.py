@@ -80,27 +80,17 @@ def get_mpm(node_graph, distance_graph):
     return bijection
 
 
-# Merge the MST and MPM (finding an Eulerian tour)
-def merge_graphs(long_graph, short_graph):
-    merged_graph = set()
-
-    # In case the graphs are accidentally switched around 
-    if len(long_graph) < len(short_graph):
-        placeholder = long_graph
-        long_graph = short_graph
-        short_graph = placeholder
-
-    for node_pair in long_graph:
-        merged_graph.add(node_pair)
-    for node_pair in short_graph:
+# Merge the MST and MPM (finding an Eulerian tour). MST is a dictionary, MPM is a tuple list.
+def merge_graphs(mst, mpm): 
+    merged = mst.copy()
+    for node_pair in mpm:
         a = node_pair[0]
         b = node_pair[1]
 
-        # Prevents duplicate edges that have the nodes switched around
-        if (b, a) not in merged_graph:
-            merged_graph.add(node_pair)
+        merged[a].append(b)
+        merged[b].append(a)
         
-    return list(merged_graph)
+    return merged
 
 
 # For making the hamiltonian tour
@@ -125,7 +115,7 @@ def is_disjoint(node_connection_dict, current_node, complete_node_count):
     return len(visited_nodes) != complete_node_count
 
 
-# For nodes that have more than two connections, we want to replace [(n, x), (n, y)] with [(x, y)]
+# For nodes that have more than two connections, we want to make a direct path between its connections by replacing [(n, x), (n, y)] with [(x, y)]
 def reconnect_nodes(node_connection_dict, n, x, y):
     node_connection_dict[x].remove(n)
     node_connection_dict[x].append(y)
