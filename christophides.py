@@ -57,31 +57,25 @@ def get_mpm(node_graph, distance_graph):
     unseen = uneven_nodes.copy()  # Prevents adding the same path originating from a different node
     for origin in uneven_nodes:
         unseen.remove(origin)
-        print(unseen)
         for destination in unseen:
             distance = distance_graph[origin][destination]
             if distance != 0:
                 node_distances.append((distance, origin, destination))
 
-    print(f"OG: {node_distances}")
     heapq.heapify(node_distances)
-    print(f"1, {node_distances}")
 
     # 3) Match nodes according to the minimum distance between them
     while uneven_nodes:
-        print(uneven_nodes)
         start_node = node_distances[0][1]
         end_node = node_distances[0][2]
     
         # Do not match nodes we already have to satisfy 
         if start_node in uneven_nodes and end_node in uneven_nodes:
-            # print(f'Distance ({distance}) between {start_node} and {end_node}')
             bijection.append((start_node, end_node))
             uneven_nodes.remove(start_node)
             uneven_nodes.remove(end_node)
         
         heapq.heappop(node_distances)
-        print(f"2, {node_distances}")
 
     return bijection
 
