@@ -42,46 +42,36 @@ def get_mst(nodes_in_graph, distance_graph):
     return mst
 
 
-# find the minimum weight perfect matching 
+# Find the minimum weight perfect matching 
 def get_mpm(node_graph, distance_graph):
-    uneven_nodes = set()  # Holds nodes that have uneven edges connecting to them
+    uneven_nodes = set()  # Nodes with an odd number of edges connecting to them
     bijection = []
     node_distances = []
 
     # 1) Identify nodes with odd-degree edges 
-    # with tuple list (O(n^2))
-    for row in node_graph:
-        # Only repeats twice
-        for node in row:
-            if node not in uneven_nodes:
-                uneven_nodes.add(node)
-            else:
-                uneven_nodes.remove(node)
-
-    # # with dict it's O(n):
-    # for node in node_graph:
-    #     if len(node_graph[node]) % 2 == 1:
-    #         uneven_nodes.add(node)
+    for node in node_graph:
+        if len(node_graph[node]) % 2 == 1:
+            uneven_nodes.add(node)
 
     # 2) Get distances of each of those nodes
-    for node in uneven_nodes:
-        for i, distance in enumerate(distance_graph[node]):
-            if i in uneven_nodes and distance != 0.0:
-                node_distances.append((distance, node, i))
-    # # with dict
-    # for node in uneven_nodes:
-    #     for destination in node_graph[node]:
-    #         node_distances.append((distance_graph[node][destination], node, destination))
+    unseen = uneven_nodes.copy()  # Prevents adding the same path originating from a different node
+    for origin in uneven_nodes:
+        unseen.remove(origin)
+        print(unseen)
+        for destination in unseen:
+            distance = distance_graph[origin][destination]
+            if distance != 0:
+                node_distances.append((distance, origin, destination))
 
-    node_distances.sort(reverse=True, key=lambda tuple: tuple[0])
-    # heapq.heapify(node_distances)
-    # print(node_distances)
+    print(f"OG: {node_distances}")
+    heapq.heapify(node_distances)
+    print(f"1, {node_distances}")
 
     # 3) Match nodes according to the minimum distance between them
     while uneven_nodes:
-        # distance = node_distances[-1][0]
-        start_node = node_distances[-1][1]
-        end_node = node_distances[-1][2]
+        print(uneven_nodes)
+        start_node = node_distances[0][1]
+        end_node = node_distances[0][2]
     
         # Do not match nodes we already have to satisfy 
         if start_node in uneven_nodes and end_node in uneven_nodes:
@@ -89,11 +79,9 @@ def get_mpm(node_graph, distance_graph):
             bijection.append((start_node, end_node))
             uneven_nodes.remove(start_node)
             uneven_nodes.remove(end_node)
-            # print(uneven_nodes)
         
-        # Two pops because the node distances are repeated
-        node_distances.pop()
-        node_distances.pop()
+        heapq.heappop(node_distances)
+        print(f"2, {node_distances}")
 
     return bijection
 
