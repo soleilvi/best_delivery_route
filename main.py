@@ -122,7 +122,10 @@ for node in merged:
     print(f"{node}: {merged[node]}")
 print(f"merged size: {len(merged)}")
 
-# final = simplify_edges(distance_graph, merged)
+final = simplify_edges(distance_graph, merged)
+print("FINAL")
+for node in final:
+    print(f"{node}: {final[node]}")
 
 # for place in places:
 #     print(f'Id: {place.id}, Name: {place.name}, Address: {place.address}')

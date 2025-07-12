@@ -131,38 +131,18 @@ def reconnect_nodes(node_connection_dict, n, x, y):
 #TODO see if you can make it work without having to copy the list constantly 
 #TODO return graph (dictionary)
 def simplify_edges(distance_graph, eulerian_graph):
-    # Dictionary instead of a 2D array since reading the nodes won't be in order -> rows are not in the correct order 
-    # Will have the 26 entries in it
-    node_connections = {}
+    node_connections = eulerian_graph.copy()
     nodes_over_two_edges = set()
 
-    # 1) Iterate over the list, append each destination node to a list that goes in a dictionary with the start node as the key
+    # 1) Find which nodes have more than two paths connected to them
     # REMOVE EDGES HERE???? Wouldn't work since the indexes would get all messed up 
-    for node_pair in eulerian_graph:
-        a = node_pair[0]
-        b = node_pair[1]
-
-        if a in node_connections:
-            node_connections[a].append(b)
-            if len(node_connections[a]) > 2: 
-                nodes_over_two_edges.add(a)
-
-        # Initialize the node in the dictionary 
-        else:
-            node_connections[a] = [b]
-
-        # a and b not being in the dictionary are not mutually exclusive events
-        if b in node_connections:
-            node_connections[b].append(a)
-            if len(node_connections[b]) > 2: 
-                nodes_over_two_edges.add(b)
-        else:
-            node_connections[b] = [a]
+    for node in node_connections:
+        if len(node_connections[node]) > 2:
+            nodes_over_two_edges.add(node)
 
     print(f"nodes over two edges: {nodes_over_two_edges}")
 
-    # 2) Get the distances between all the destination nodes
-    new_paths = []
+    # 2) Get the distances between all the destination nodes and put them in a priority queue 
     while nodes_over_two_edges:
         node = nodes_over_two_edges.pop()
         destination_nodes = node_connections[node]
@@ -171,7 +151,6 @@ def simplify_edges(distance_graph, eulerian_graph):
         i = n - 1
 
         print(f"current node: {node}")
-
 
         # printing dict, delete once done
         # for key in node_connections:
@@ -186,14 +165,14 @@ def simplify_edges(distance_graph, eulerian_graph):
                 destination_node_distances.append((distance_graph[start_node][end_node], start_node, end_node))  # Distance between start and end nodes
             i -= 1
 
-        destination_node_distances.sort(reverse=True, key=lambda sub_list: sub_list[0])
+        heapq.heapify(destination_node_distances)
 
         # delete
         # print(f"destination distances: {destination_node_distances}")
 
-        # 3) Replace [(n, x), (n, y)] with [(x, y)]
-        start_node = destination_node_distances[-1][1]
-        end_node = destination_node_distances[-1][2]
+        # 3) Remove extra paths from the origin node by reconnecting those paths to the destinations with the smallest distance between them
+        start_node = destination_node_distances[0][1]
+        end_node = destination_node_distances[0][2]
         print(f"(out) node: {node}, start_node: {start_node}, end_node: {end_node}")
         original_paths = {"node": node_connections[node].copy(), "start": node_connections[start_node].copy(), "end": node_connections[end_node].copy()}
 
@@ -202,19 +181,18 @@ def simplify_edges(distance_graph, eulerian_graph):
         print(node_connections[start_node])
         print(node_connections[end_node])
 
-        # of course it's going to be disjoint, it's not getting repaired >:(
         while is_disjoint(node_connections, start_node, len(distance_graph)):
             node_connections[node] = original_paths["node"].copy()
             node_connections[start_node] = original_paths["start"].copy()
             node_connections[end_node] = original_paths["end"].copy()
 
-            destination_node_distances.pop()
+            heapq.heappop(destination_node_distances)
 
             #delete
-            print(f"path: {destination_node_distances[-1]}")
+            print(f"path: {destination_node_distances[0]}")
 
-            start_node = destination_node_distances[-1][1]
-            end_node = destination_node_distances[-1][2]
+            start_node = destination_node_distances[0][1]
+            end_node = destination_node_distances[0][2]
             original_paths["start"] = node_connections[start_node].copy()
             original_paths["end"] = node_connections[end_node].copy()
 
@@ -226,20 +204,19 @@ def simplify_edges(distance_graph, eulerian_graph):
 
             # delete
             print(f"CONNECTIONS AFTER: node: {node_connections[node]}, start_node: {node_connections[start_node]}, end_node: {node_connections[end_node]}")
-
-        new_paths.append(destination_node_distances[-1])  # For the final graph
                 
         # 5) Repeat until the current start node only has two distances (add the node to the set again if the length is still over 2)
         if len(node_connections[node]) > 2:
             nodes_over_two_edges.add(node)
 
     print(is_disjoint(node_connections, 10, len(distance_graph)))
+    return node_connections
 
-    # TODO: this
-    # Copy and paste the code in is_disjoint and just return the total distance idfk, I actually don't know what the purpose of this one is.
-    def traverse_graph():
-        pass
+# TODO: this
+# Copy and paste the code in is_disjoint and just return the total distance idfk, I actually don't know what the purpose of this one is.
+def traverse_graph(graph):
+    pass
 
 
-    def christophides():
-        pass
+def christophides():
+    pass
