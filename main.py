@@ -2,6 +2,7 @@ import csv
 from package import Package
 from place import Place
 from christophides import *
+from delivery import *
 
 def load_package_data(file_path):
     packages = []
@@ -104,9 +105,9 @@ distance_graph = load_distance_graph(places)
 #     print(row)
 
 chris= christophides(len(places), distance_graph)
-print("CHRISTOPHIDES")
-for node in chris:
-    print(f"{node}: {chris[node]}")
+
+print(24 % 24)
+print(int(18.32/18 * 60) % 60)
 
 # for place in places:
 #     print(f'Id: {place.id}, Name: {place.name}, Address: {place.address}')
