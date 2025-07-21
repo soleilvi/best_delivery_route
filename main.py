@@ -68,42 +68,46 @@ places_hash = PlacesHash(1000)
 
 packages = load_package_data('./data/package_data.csv')
 places = load_distance_data('./data/distance_data.csv')
-trucks = {1: Truck(1), 2: Truck(2)}
+trucks = {1: Truck(1, TimeMod(8, 0)), 2: Truck(2, TimeMod(9, 30))}
 
 package_hash.load(packages)
 places_hash.load(places)
+packages_to_deliver = set()
+
+for package in packages:
+    packages_to_deliver.add(package)
 
 distance_graph = load_distance_graph(places)
 
-# load_truck(trucks, len(trucks), package_hash)
+load_truck(trucks, len(trucks), package_hash, packages_to_deliver)
 # print(package_hash)
 # chris= christophides(len(places), distance_graph)
 
 # for place in places:
 #     print(f'Id: {place.id}, Name: {place.name}, Address: {place.address}')
 
-# Print packages hash
-for i, bucket in enumerate(package_hash.hash):
-    if bucket is not None:
-        if isinstance(bucket, list):
-            for package in bucket:
-                print(f"Hash Index: {i}, Package ID: {package.id}, Address: {package.address}, City: {package.city}, State: {package.state}, Zip: {package.zip}, Deadline: {package.deadline}, Weight: {package.weight}, Notes: {package.notes}")
-        else:
-            print(f"Hash Index: {i}, Package ID: {bucket.id}, Address: {bucket.address}, City: {bucket.city}, State: {bucket.state}, Zip: {bucket.zip}, Deadline: {bucket.deadline}, Weight: {bucket.weight}, Notes: {bucket.notes}")
-    else:
-        print(f"Hash Index: {i} is empty.")
-# Ensure get() works
-for package in packages:
-    pee = package_hash.get(package)
-    print(pee.id)
+# # Print packages hash
+# for i, bucket in enumerate(package_hash.hash):
+#     if bucket is not None:
+#         if isinstance(bucket, list):
+#             for package in bucket:
+#                 print(f"Hash Index: {i}, Package ID: {package.id}, Address: {package.address}, City: {package.city}, State: {package.state}, Zip: {package.zip}, Deadline: {package.deadline}, Weight: {package.weight}, Notes: {package.notes}")
+#         else:
+#             print(f"Hash Index: {i}, Package ID: {bucket.id}, Address: {bucket.address}, City: {bucket.city}, State: {bucket.state}, Zip: {bucket.zip}, Deadline: {bucket.deadline}, Weight: {bucket.weight}, Notes: {bucket.notes}")
+#     else:
+#         print(f"Hash Index: {i} is empty.")
+# # Ensure get() works
+# for package in packages:
+#     pee = package_hash.get(package)
+#     print(pee.id)
 
-# Print places hash
-for i, bucket in enumerate(places_hash.hash):
-    if bucket is not None:
-        for place in bucket:
-            print(f'in bucket. Index = {i}')
-            print(f'Id: {place.id}, Name: {place.name}, Address: {place.address}')
-# Ensure get() works
-for place in places:
-    pee = places_hash.get(place)
-    print(pee.id)
+# # Print places hash
+# for i, bucket in enumerate(places_hash.hash):
+#     if bucket is not None:
+#         for place in bucket:
+#             print(f'in bucket. Index = {i}')
+#             print(f'Id: {place.id}, Name: {place.name}, Address: {place.address}')
+# # Ensure get() works
+# for place in places:
+#     pee = places_hash.get(place)
+#     print(pee.id)

@@ -31,7 +31,19 @@ class PackageHash:
         if self.has_package(package):
             return package
         else:
-            raise ValueError(f"Package with ID {package.id} not in hash, could not retrieve it.")
+            raise ValueError(f"Package not in hash, could not retrieve it.")
+    
+    def get_through_id(self, package_id):
+        key = package_id
+        index = (key - 1) % len(self.hash)
+
+        if self.hash[index] is None:
+            raise ValueError(f"Package not in hash, could not retrieve it.")
+        else:
+            for package in self.hash[index]:
+                if int(package.id) == package_id:
+                    return package
+        raise ValueError(f"Package not in hash, could not retrieve it.")
     
     def remove(self, package):
         key = int(package.id)
@@ -39,8 +51,14 @@ class PackageHash:
         
         if self.has_package(package):
             self.hash[index].remove(package)
-            print("removed")
+            print(f"removed {package.id}")
+
+            # If there are no other packages in the bucket at the current index 
+            if not self.hash[index]:
+                self.hash[index] = None
+                print(f"emptied bucket containing {package.id}")
+            
         else:
-            raise ValueError("Package with ID {package.id} not in hash, could not remove it.")
+            raise ValueError("Package not in hash, could not remove it.")
             
         
