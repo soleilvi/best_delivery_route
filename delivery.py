@@ -2,6 +2,14 @@ from timemod import TimeMod
 from package_hash import PackageHash
 from truck import Truck
 
+'''
+NOTE: there is a minor bug caused by not removing x and y in the "Must be" 
+section. It could mess up the count when loading the trucks. Ultimately, I 
+actually think this bug is harmless for now and does not make enough trouble
+to merit the effort of resolving it since I'd need to reformat a big chunk
+of the code.
+'''
+
 # Restriction: The notes in future implementations of the program need to follow the same format as in this one
 # Restriction: If future implementations of the program include more special notes, they need to be added here. 
 def parse_note(note: str):
@@ -22,22 +30,19 @@ would need to implement different logic if the wrong address changed after the
 late truck departed. 
 - Does not account for multiple late trucks
 '''
-def load_truck(trucks: list, number_of_trucks: int, packages: PackageHash, packages_to_deliver: set):
-    # deliver_together = {}
-    # print(packages_to_deliver)
+def load_truck(trucks: list, packages: PackageHash, packages_to_deliver: set):
     deliver_together = []  # Will contain sets with the IDs of packages that need to be delivered together
 
     early_truck = 1 # Truck that leaves when the shift starts
     late_truck = 2  # Truck that waits for late packages
     
     # 1) Identify which packages have special notes 
-    for i, bucket in enumerate(packages.hash):
+    for bucket in packages.hash:
         if bucket is not None:
             for package in bucket:
                 note = package.notes
                 # If the note is not empty
                 if note:
-                    print(note)
                     # 2) Parse the string to identify what must be done with the special packages
                     # For delayed, you should implement more logic for loading the truck depending on whether there are packages that will be delivered after noon or not...etc.
                     if "Delayed" in note:  # Delayed on flight---will not arrive to depot until  xx:xx xm
@@ -86,13 +91,8 @@ def load_truck(trucks: list, number_of_trucks: int, packages: PackageHash, packa
 
                     packages_to_deliver.remove(package)
 
-    # delete
-    for i, set in enumerate(deliver_together):
-        print(f"deliver together set {i + 1}: {set}")
-    
     for set in deliver_together:
         for package in set:
-            print(f"deliver together package: {package.id}")
             if trucks[early_truck].has_package(package):
                 trucks[early_truck].load_packages(set)
                 break
@@ -100,20 +100,32 @@ def load_truck(trucks: list, number_of_trucks: int, packages: PackageHash, packa
                 trucks[late_truck].load_packages(set)
                 break
 
+    # Evenly divide the remaining packages between the trucks
+    # May have to put in more if-statements to adjust for more trucks
+    while packages_to_deliver:
+        truck_to_load = len(packages_to_deliver) % len(trucks) + 1
+        other_truck = truck_to_load % len(trucks) + 1
+        package = packages_to_deliver.pop()
+
+        if not trucks[truck_to_load].is_full():
+            trucks[truck_to_load].load_package(package)
+        elif not trucks[other_truck]: 
+            trucks[other_truck].load_package(package)
+        # if both trucks are already full, add the popped package back in and leave the set as it is
+        else: 
+            packages_to_deliver.add(package)
+            break
+
     #to print, delete later
+    print("PACKAGES LEFT")
     for package in packages_to_deliver:
         print(package.id)
     print("TRUCK 1")
-    for package in trucks[1].packages:
-        print(package.id)
+    for i, package in enumerate(trucks[1].packages):
+        print(f"{i + 1}: {package.id}")
     print("TRUCK 2")
-    for package in trucks[2].packages:
-        print(package.id)
-
-    # # Evenly divide the remaining packages between the trucks
-    # len(packages) % number_of_trucks:
-    #     if not trucks[i].is_full():
-    #         trucks[i].packages.append(package)
+    for i, package in enumerate(trucks[2].packages):
+        print(f"{i + 1}: {package.id}")
 
 
 # Choosing paths taking into account delivery deadlines and packages that need to be linked together

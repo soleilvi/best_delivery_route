@@ -1,47 +1,16 @@
-from christophides import *
+from delivery import *
 
-distances1 = [[0, 1, 6, 3],
-              [1, 0, 5, 4],
-              [6, 5, 0, 8],
-              [3, 4, 8, 0]]
+packages_to_deliver = {1, 2, 3, 4, 5, 6, 7, 8}
+trucks = {1: Truck(1, TimeMod(8, 0)), 2: Truck(2, TimeMod(9, 30))}
 
-distances2 = [[0, 2, 3, 3, 0, 0, 0],
-              [2, 0, 4, 0, 3, 0, 0],
-              [3, 4, 0, 5, 1, 6, 0],
-              [3, 0, 5, 0, 0, 7, 10],
-              [0, 3, 1, 0, 0, 8, 11],
-              [0, 0, 6, 7, 8, 0, 9],
-              [0, 0, 0, 10, 11, 9, 0]]
+length = 4
 
-graph2 = {0: [1, 2, 3],
-          1: [0, 2, 4],
-          2: [0, 1, 3, 4, 5],
-          3: [0, 2, 5, 6],
-          4: [1, 2, 5, 6],
-          5: [2, 3, 4, 6],
-          6: [3, 4, 5]}
-
-# pee = {}
-# for i in range(5):
-#     pee[i] = []
-# print(pee)
-# length = 5
-# heck = {i:[] for i in range(length)}
-# print(heck)
-
-
-mst1 = get_mst(4, distances1)
-print("MST 1:")
-print(mst1)
-
-mst2 = get_mst(7, distances2)
-print("MST 2:")
-print(mst2)
-
-mpm1 = get_mpm(mst1, distances1)
-print("MPM 1")
-print(mpm1)
-
-mpm2 = get_mpm(mst2, distances2)
-print("MPM 2")
-print(mpm2)
+while packages_to_deliver:
+        truck_to_load = len(packages_to_deliver) % length + 1
+        package = packages_to_deliver.pop()
+        print(f"truck to load {truck_to_load}")
+        print(f"other: {truck_to_load % length + 1}")
+        # if not trucks[truck_to_load].is_full():
+        #     trucks[truck_to_load].load_package(package)
+        # elif not trucks[(truck_to_load + 1) + 1]: 
+        #     trucks[(truck_to_load + 1) + 1].load_package(package)

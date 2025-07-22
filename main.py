@@ -1,8 +1,6 @@
 import csv
 from package import Package
 from place import Place
-from truck import Truck
-from package_hash import PackageHash
 from places_hash import PlacesHash
 from christophides import *
 from delivery import *
@@ -79,7 +77,7 @@ for package in packages:
 
 distance_graph = load_distance_graph(places)
 
-load_truck(trucks, len(trucks), package_hash, packages_to_deliver)
+load_truck(trucks, package_hash, packages_to_deliver)
 # print(package_hash)
 # chris= christophides(len(places), distance_graph)
 
