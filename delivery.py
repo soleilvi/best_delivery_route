@@ -35,7 +35,6 @@ def load_truck(trucks: list, number_of_trucks: int, packages: PackageHash, packa
         if bucket is not None:
             for package in bucket:
                 note = package.notes
-                print(f"currently on: {package.id}")
                 # If the note is not empty
                 if note:
                     print(note)
@@ -52,11 +51,9 @@ def load_truck(trucks: list, number_of_trucks: int, packages: PackageHash, packa
                             trucks[early_truck].load_package(package)
 
                     elif "Must be" in note:  # Must be delivered with x, y
-                        # 1) What if it isn't in the hash anymore? 
                         x = packages.get_through_id(int(note[-6:-4]))
                         y = packages.get_through_id(int(note[-2:]))
-                        # x = int(note[-6:-4])
-                        # y = int(note[-2:]) 
+
 
                         if deliver_together:
                             for set in deliver_together:
@@ -69,27 +66,6 @@ def load_truck(trucks: list, number_of_trucks: int, packages: PackageHash, packa
                         else: 
                             deliver_together.append({package, x, y})
 
-                        # for truck in trucks.values():
-                        #     if truck.has_package(x):
-                        #         print(f"This is x: {x}")
-                        #         truck.load_package(package)
-                        #         truck.load_package(y)
-                        #         packages_to_deliver.remove(package)
-                        #         packages_to_deliver.remove(package.get_through_id(y))
-                        #     elif truck.has_package(y):
-                        #         print(f"This is y: {y}")
-                        #         truck.load_package(package)
-                        #         truck.load_package(x)
-                        #         packages_to_deliver.remove(package)
-                        #         packages_to_deliver.remove(package.get_through_id(x))
-
-                        # Link each package together in a dictionary. setdefault removes the need to use an if-statement to check if the key is in the dictionary.
-                        # deliver_together.setdefault(package, set()).update({x, y})
-                        # deliver_together.setdefault(x, set()).update({package, y})
-                        # deliver_together.setdefault(y, set()).update({package, x})
-
-                        # if p_id = 
-
                     elif "Can only" in note:  # Can only be on truck x
                         trucks[int(note[-1])].load_package(package)
 
@@ -101,20 +77,12 @@ def load_truck(trucks: list, number_of_trucks: int, packages: PackageHash, packa
                 elif package.deadline != "EOD":
                     deadline = TimeMod()
                     deadline.str_to_time(package.deadline)
-                    # truck_to_load = 0
-                    # acceptable = trucks[early_truck].add_time(3, 0)
 
                     # Add to early truck if the package could be delivered within the next 3 hours after it departs
                     if deadline.is_less_than(trucks[early_truck].depart_time.add_time(TimeMod(3, 0))):
                         trucks[early_truck].load_package(package)
-                        # truck_to_load = early_truck
                     else:
                         trucks[late_truck].load_package(package) 
-                        # truck_to_load = late_truck
-
-                    # if package in deliver_together:
-                    #     trucks[truck_to_load].load_packages(deliver_together[package])
-                    #     deliver_together.remove(package)
 
                     packages_to_deliver.remove(package)
 
@@ -132,23 +100,6 @@ def load_truck(trucks: list, number_of_trucks: int, packages: PackageHash, packa
                 trucks[late_truck].load_packages(set)
                 break
 
-        # for truck in trucks.values():
-        #     print(f"package: {package.id}")
-        #     if truck.has_package(packages.get(package)):
-        #         for dependent_package in deliver_together[package]:
-        #             truck.load_package(packages.get(package))
-        #             deliver_together[dependent_package].remove(package)
-        #             packages.remove(dependent_package)
-            # if packages[package_id] is not None:  # Remove this too
-            #     if truck.has_package(packages[package_id][0]):  # TODO: Later replace this with a get_package() function from the hash, oh god
-            #         for dependent_package_id in deliver_together[package_id]:
-            #             if packages[dependent_package_id] is not None:
-            #                 truck.load_package(packages[dependent_package_id][0])  # This one too
-            #                 deliver_together[dependent_package_id].remove(package_id)
-            #                 packages[dependent_package_id].remove(packages[dependent_package_id][0]) # And this one
-            #                 if not packages[dependent_package_id]:
-            #                     packages[dependent_package_id] = None                
-    
     #to print, delete later
     for package in packages_to_deliver:
         print(package.id)
