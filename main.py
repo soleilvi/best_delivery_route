@@ -2,7 +2,7 @@ import csv
 from package import Package
 from place import Place
 from places_hash import PlacesHash
-from christophides import *
+from christofides import *
 from delivery import *
 
 # You need one truck to leave late to wait for the packages that are late. Truck 1 is the "early" truck, while truck 2 is the "late" truck.
@@ -79,7 +79,7 @@ distance_graph = load_distance_graph(places)
 
 load_truck(trucks, package_hash, packages_to_deliver)
 # print(package_hash)
-# chris= christophides(len(places), distance_graph)
+# chris= christofides(len(places), distance_graph)
 
 # for place in places:
 #     print(f'Id: {place.id}, Name: {place.name}, Address: {place.address}')
