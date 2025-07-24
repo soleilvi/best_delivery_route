@@ -3,16 +3,15 @@ import heapq
 # TODO: would it be good to make a dictionary that includes the distance as well as the node...?
 
 # Calculate the minimum spanning tree (MST) using Prim's algorithm
-#TODO: initialize the mst with the correct node IDs. The graph will not necessarily have nodes in sequential number.
-def get_mst(nodes_in_graph, distance_graph):
+def get_mst(nodes_list, distance_graph):
     current_node = 0  # Starting node for the MST
     visited_nodes = set()
     possible_paths = []
-    mst = {i:[] for i in range(nodes_in_graph)}  # An MST includes all the nodes in the graph. Initialize all the nodes in a dictionary without any connections.
+    mst = {node.id:[] for node in nodes_list}  # An MST includes all the nodes in the graph. Initialize all the nodes in a dictionary without any connections.
+    print(mst)
 
     # while we don't have connections between all the nodes
-    while len(visited_nodes) < nodes_in_graph - 1:
-        # visited_nodes[current_node] = True
+    while len(visited_nodes) < len(nodes_list) - 1:
         visited_nodes.add(current_node)
 
         # get the distances stored in the current node

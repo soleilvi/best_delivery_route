@@ -89,10 +89,14 @@ distance_graph = load_distance_graph(places)
 load_trucks(trucks, package_hash, packages_to_deliver)
 print_truck_contents(trucks)
 # print(package_hash)
-# chris= christofides(len(places), distance_graph)
+chris = christofides(places, distance_graph)
 
-# for place in places:
-#     print(f'Id: {place.id}, Name: {place.name}, Address: {place.address}')
+print("CHRISTOPHIDES")
+for node in chris:
+    print(f"{node}: {chris[node]}")
+
+for place in places:
+    print(f'Id: {place.id}, Name: {place.name}, Address: {place.address}')
 
 # # Print packages hash
 # for i, bucket in enumerate(package_hash.hash):
