@@ -12,29 +12,15 @@ to merit the effort of resolving it since I'd need to reformat a big chunk
 of the code.
 '''
 
-# Restriction: The notes in future implementations of the program need to follow the same format as in this one
-# Restriction: If future implementations of the program include more special notes, they need to be added here. 
-def parse_note(note: str):
-    if "Delayed" in note:
-        print("omg")
-    elif "Must be" in note:
-        print("teid")
-    elif "Can only" in note:
-        print("wrong address")
-    elif "Wrong address" in note:
-        pass
 
 '''
-- Modify late_truck and late_depart_time accordingly in future programs
 - Appends the wrong address package to the late truck because we know from the 
 assignment instructions that it updates to the correct one at 10:30 AM, but it 
 would need to implement different logic if the wrong address changed after the 
 late truck departed. 
-- Does not account for multiple late trucks
+- Does not account for more than two late/early trucks
 '''
-# TODO: optimize function to be used repeatedly throughout the program. AKA: don't run through the entire hash every time
-# TODO: 32 is not being loaded to Truck 2....but then again, it doesn't have a deadline like the other one has, so *shrug*
-def load_truck(trucks: list, packages: PackageHash, packages_to_deliver: list):
+def load_trucks(trucks: list, packages: PackageHash, packages_to_deliver: list):
     deliver_together = []  # Will contain sets with the IDs of packages that need to be delivered together
     early_truck = trucks[1] # Truck that leaves when the shift starts
     late_truck = trucks[2] # Truck that waits for late packages
@@ -43,7 +29,6 @@ def load_truck(trucks: list, packages: PackageHash, packages_to_deliver: list):
         package = packages_to_deliver[0]
         # 1) Identify which packages have special notes 
         note = package.notes
-        print(f"On package: {package.id}")
         if note:
             # 2) Parse the string to identify what must be done with the special packages
             # For delayed, you should implement more logic for loading the truck depending on whether there are packages that will be delivered after noon or not...etc.
@@ -95,38 +80,7 @@ def load_truck(trucks: list, packages: PackageHash, packages_to_deliver: list):
             elif not late_truck.is_full():
                 late_truck.load_package(package) 
 
-        # delete
-        if early_truck.is_full() and late_truck.is_full():
-            print("trucks are full")
-        
         heapq.heappop(packages_to_deliver)
- 
-    # # Evenly divide the remaining packages between the trucks
-    # # May have to put in more if-statements to adjust for more trucks
-    # while packages_to_deliver:
-    #     truck_to_load = len(packages_to_deliver) % len(trucks) + 1
-    #     other_truck = truck_to_load % len(trucks) + 1
-    #     package = packages_to_deliver.pop()
-
-    #     if not trucks[truck_to_load].is_full():
-    #         trucks[truck_to_load].load_package(package)
-    #     elif not trucks[other_truck]: 
-    #         trucks[other_truck].load_package(package)
-    #     # if both trucks are already full, add the popped package back in and leave the set as it is
-    #     else: 
-    #         packages_to_deliver.add(package)
-    #         break
-
-    #to print, delete later
-    print("PACKAGES LEFT")
-    for package in packages_to_deliver:
-        print(package.id)
-    print("TRUCK 1")
-    for i, package in enumerate(trucks[1].packages):
-        print(f"{i + 1}: {package.id}")
-    print("TRUCK 2")
-    for i, package in enumerate(trucks[2].packages):
-        print(f"{i + 1}: {package.id}")
 
 
 # Choosing paths taking into account delivery deadlines and packages that need to be linked together
