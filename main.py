@@ -87,6 +87,7 @@ heapq.heapify(packages_to_deliver)  # Priority queue that sorts the packages by 
 distance_graph = load_distance_graph(places)
 
 load_trucks(trucks, package_hash, packages_to_deliver)
+print_truck_contents(trucks)
 # print(package_hash)
 # chris= christofides(len(places), distance_graph)
 

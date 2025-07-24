@@ -12,6 +12,17 @@ to merit the effort of resolving it since I'd need to reformat a big chunk
 of the code.
 '''
 
+def print_truck_contents(trucks: list):
+    i = 1
+    print("-----------------------------------")
+    print("|    TRUCK 1     |    TRUCK 2     |")
+    print("|---------------------------------|")
+    for p1, p2 in zip(trucks[1].packages, trucks[2].packages): 
+        print(f"| package {i}: {p1.id}".ljust(16), "|" 
+              f" package {i}: {p2.id}".ljust(16), "|")
+        i += 1
+    print("-----------------------------------")
+
 
 '''
 - Appends the wrong address package to the late truck because we know from the 
