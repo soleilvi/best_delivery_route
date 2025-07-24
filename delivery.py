@@ -94,12 +94,12 @@ def load_trucks(trucks: list, packages: PackageHash, packages_to_deliver: list):
         heapq.heappop(packages_to_deliver)
 
 
-# Choosing paths taking into account delivery deadlines and packages that need to be linked together
-def choose_delivery_route(packages: list):
-    special_packages = set()
-    
-    # 3) Implement the special instructions that come with the packages
-    # 4) Return the paths for each truck 
+# Get a list of all the places the truck will need to visit to deliver the packages. 
+# Does the list order matter?
+def get_delivery_route(packages: list):    
+    # 1) Loop over packages to retrieve the address of each of their destinations. Put them in a list.
+    # 2) Return list
+    pass
     
 
 # Show update messages and track time with this
