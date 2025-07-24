@@ -1,7 +1,13 @@
 import csv
+import heapq
+
 from package import Package
 from place import Place
+from truck import Truck
 from places_hash import PlacesHash
+from package_hash import PackageHash
+from timemod import TimeMod
+
 from christofides import *
 from delivery import *
 
@@ -19,7 +25,7 @@ def load_package_data(file_path):
             next(data) 
 
         for row in data:
-            new_package = Package(row[0], row[1], row[2], row[3], row[4], row[5], row[6], row[7])
+            new_package = Package(int(row[0]), row[1], row[2], row[3], row[4], row[5], row[6], row[7])
             packages.append(new_package)
     return packages
 
@@ -70,10 +76,13 @@ trucks = {1: Truck(1, TimeMod(8, 0)), 2: Truck(2, TimeMod(9, 30))}
 
 package_hash.load(packages)
 places_hash.load(places)
-packages_to_deliver = set()
+packages_to_deliver = []
 
 for package in packages:
-    packages_to_deliver.add(package)
+    packages_to_deliver.append(package)
+heapq.heapify(packages_to_deliver)  # Priority queue that sorts the packages by deadline.
+# for package in packages_to_deliver:
+#     print(package.id, package.deadline.time_to_str())
 
 distance_graph = load_distance_graph(places)
 

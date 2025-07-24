@@ -16,17 +16,16 @@ class Truck:
         
     def load_package(self, package):
         if self.is_full():
-            raise OverflowError(f"Truck is full. Maximum size is {self.capacity}")
+            raise OverflowError(f"The truck is already full, could not load package.")
         else:
             self.packages.add(package)
     
     def load_packages(self, package_set):
+        self.packages.update(package_set)
         if self.is_full():
-            raise OverflowError(f"Truck is full. Maximum size is {self.capacity}")
-        elif len(self.packages) + len(package_set) > self.capacity:
-            raise OverflowError(f"Truck cannot load the packages because it will be too full. Maximum size is {self.capacity}")
-        else:
-            self.packages.update(package_set)
+            current_load = len(self.packages)
+            self.packages.discard(package_set)
+            raise OverflowError(f"Truck is full. Maximum size is {self.capacity}, current load is {len(self.packages)}")
 
     def has_package(self, package):
         if isinstance(package, int):

@@ -1,3 +1,5 @@
+import heapq
+
 from timemod import TimeMod
 from package_hash import PackageHash
 from truck import Truck
@@ -30,91 +32,90 @@ would need to implement different logic if the wrong address changed after the
 late truck departed. 
 - Does not account for multiple late trucks
 '''
-def load_truck(trucks: list, packages: PackageHash, packages_to_deliver: set):
+# TODO: optimize function to be used repeatedly throughout the program. AKA: don't run through the entire hash every time
+# TODO: 32 is not being loaded to Truck 2....but then again, it doesn't have a deadline like the other one has, so *shrug*
+def load_truck(trucks: list, packages: PackageHash, packages_to_deliver: list):
     deliver_together = []  # Will contain sets with the IDs of packages that need to be delivered together
-
-    early_truck = 1 # Truck that leaves when the shift starts
-    late_truck = 2  # Truck that waits for late packages
+    early_truck = trucks[1] # Truck that leaves when the shift starts
+    late_truck = trucks[2] # Truck that waits for late packages
     
-    # 1) Identify which packages have special notes 
-    for bucket in packages.hash:
-        if bucket is not None:
-            for package in bucket:
-                note = package.notes
-                # If the note is not empty
-                if note:
-                    # 2) Parse the string to identify what must be done with the special packages
-                    # For delayed, you should implement more logic for loading the truck depending on whether there are packages that will be delivered after noon or not...etc.
-                    if "Delayed" in note:  # Delayed on flight---will not arrive to depot until  xx:xx xm
-                        time = TimeMod()
-                        time.str_to_time(note[-8:]) # contains "xx:xx xm"
-                        
-                        # Load delayed packages into the late truck if they will arrive at the facility before it departs. Otherwise, it will have to wait for the first truck to come back.
-                        if time.is_less_than(trucks[late_truck].depart_time) or time.is_equal_to(trucks[late_truck].depart_time):
-                            trucks[late_truck].load_package(package)
+    while packages_to_deliver and not (early_truck.is_full() and late_truck.is_full()):
+        package = packages_to_deliver[0]
+        # 1) Identify which packages have special notes 
+        note = package.notes
+        print(f"On package: {package.id}")
+        if note:
+            # 2) Parse the string to identify what must be done with the special packages
+            # For delayed, you should implement more logic for loading the truck depending on whether there are packages that will be delivered after noon or not...etc.
+            if "Delayed" in note:  # Delayed on flight---will not arrive to depot until  xx:xx xm
+                time = TimeMod()
+                time.str_to_time(note[-8:]) # contains "xx:xx xm"
+                # Load delayed packages into the late truck if they will arrive at the facility before it departs. Otherwise, it will have to wait for the first truck to come back.
+                if time.is_less_than(late_truck.depart_time) or time.is_equal_to(late_truck.depart_time):
+                    if not late_truck.is_full(): late_truck.load_package(package)
+                else:
+                    if not early_truck.is_full(): early_truck.load_package(package)
+
+            elif "Must be" in note:  # Must be delivered with x, y
+                x = packages.get_through_id(int(note[-6:-4]))
+                y = packages.get_through_id(int(note[-2:]))
+                if deliver_together:
+                    for set in deliver_together:
+                        if (x in set) or (y in set) or (package in set):
+                            set.add(package)
+                            set.add(x)
+                            set.add(y)
                         else:
-                            trucks[early_truck].load_package(package)
-
-                    elif "Must be" in note:  # Must be delivered with x, y
-                        x = packages.get_through_id(int(note[-6:-4]))
-                        y = packages.get_through_id(int(note[-2:]))
-
-
-                        if deliver_together:
-                            for set in deliver_together:
-                                if (x in set) or (y in set) or (package in set):
-                                    set.add(package)
-                                    set.add(x)
-                                    set.add(y)
-                                else:
-                                    deliver_together.append({package, x, y})
-                        else: 
                             deliver_together.append({package, x, y})
+                else: 
+                    deliver_together.append({package, x, y})
 
-                    elif "Can only" in note:  # Can only be on truck x
-                        trucks[int(note[-1])].load_package(package)
+            elif "Can only" in note:  # Can only be on truck x
+                if not trucks[int(note[-1])].is_full(): trucks[int(note[-1])].load_package(package)
 
-                    elif "Wrong address" in note: # Wrong address listed
-                        trucks[late_truck].load_package(package)
+            elif "Wrong address" in note: # Wrong address listed
+                if not late_truck.is_full(): late_truck.load_package(package)
 
-                    packages_to_deliver.remove(package)
+        # 3) Add any packages that we have identified are linked together
+        for set in deliver_together:
+            for package in set:
+                if early_truck.has_package(package):
+                    early_truck.load_packages(set)
+                    deliver_together.remove(set)
+                    break
+                elif late_truck.has_package(package):
+                    late_truck.load_packages(set)
+                    deliver_together.remove(set)
+                    break
 
-                elif package.deadline != "EOD":
-                    deadline = TimeMod()
-                    deadline.str_to_time(package.deadline)
+        # 4) Add package based on time priority. Since packages_to_deliver is a priority queue based on delivery time, we just need to worry about whether the truck is full.
+        if not note:  # Making sure the package was not removed previously
+            if not early_truck.is_full():
+                early_truck.load_package(package)
+            elif not late_truck.is_full():
+                late_truck.load_package(package) 
 
-                    # Add to early truck if the package could be delivered within the next 3 hours after it departs
-                    if deadline.is_less_than(trucks[early_truck].depart_time.add_time(TimeMod(3, 0))):
-                        trucks[early_truck].load_package(package)
-                    else:
-                        trucks[late_truck].load_package(package) 
+        # delete
+        if early_truck.is_full() and late_truck.is_full():
+            print("trucks are full")
+        
+        heapq.heappop(packages_to_deliver)
+ 
+    # # Evenly divide the remaining packages between the trucks
+    # # May have to put in more if-statements to adjust for more trucks
+    # while packages_to_deliver:
+    #     truck_to_load = len(packages_to_deliver) % len(trucks) + 1
+    #     other_truck = truck_to_load % len(trucks) + 1
+    #     package = packages_to_deliver.pop()
 
-                    packages_to_deliver.remove(package)
-
-    for set in deliver_together:
-        for package in set:
-            if trucks[early_truck].has_package(package):
-                trucks[early_truck].load_packages(set)
-                break
-            elif trucks[late_truck].has_package(package):
-                trucks[late_truck].load_packages(set)
-                break
-
-    # Evenly divide the remaining packages between the trucks
-    # May have to put in more if-statements to adjust for more trucks
-    while packages_to_deliver:
-        truck_to_load = len(packages_to_deliver) % len(trucks) + 1
-        other_truck = truck_to_load % len(trucks) + 1
-        package = packages_to_deliver.pop()
-
-        if not trucks[truck_to_load].is_full():
-            trucks[truck_to_load].load_package(package)
-        elif not trucks[other_truck]: 
-            trucks[other_truck].load_package(package)
-        # if both trucks are already full, add the popped package back in and leave the set as it is
-        else: 
-            packages_to_deliver.add(package)
-            break
+    #     if not trucks[truck_to_load].is_full():
+    #         trucks[truck_to_load].load_package(package)
+    #     elif not trucks[other_truck]: 
+    #         trucks[other_truck].load_package(package)
+    #     # if both trucks are already full, add the popped package back in and leave the set as it is
+    #     else: 
+    #         packages_to_deliver.add(package)
+    #         break
 
     #to print, delete later
     print("PACKAGES LEFT")
