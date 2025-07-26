@@ -2,6 +2,7 @@ import heapq
 
 from timemod import TimeMod
 from package_hash import PackageHash
+from places_hash import PlacesHash
 from truck import Truck
 
 '''
@@ -96,10 +97,15 @@ def load_trucks(trucks: list, packages: PackageHash, packages_to_deliver: list):
 
 # Get a list of all the places the truck will need to visit to deliver the packages. 
 # Does the list order matter?
-def get_delivery_route(packages: list):    
-    # 1) Loop over packages to retrieve the address of each of their destinations. Put them in a list.
+def get_delivery_route(packages: list, places: PlacesHash):    
+    route = {places.get(places.address_to_place("HUB"))}
+    # 1) Loop over packages to retrieve the address of each of their destinations. Put them in a set to avoid repeats.
+    for package in packages:
+        destination = places.get(places.address_to_place(package.address))
+        route.add(destination)
+
     # 2) Return list
-    pass
+    return route
     
 
 # Show update messages and track time with this
