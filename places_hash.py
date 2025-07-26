@@ -23,6 +23,21 @@ class PlacesHash:
                 print("collision detected")  # for determining index insertion method
                 self.hash[index].append(place)
 
+    def address_to_place(self, address):
+        key = ''.join(num for num in address[:3] if num.isdigit())  # [:3] instead of [:4] because the address format in a package object excludes the space at the beginning
+        if key == '': 
+            key = 0
+        else:
+            key = int(key)  
+
+        index = key % len(self.hash)  
+
+        for place in self.hash[index]:
+            if address[:4] in place.address[:5]:
+                return place
+
+        raise ValueError(f"Could not find a match for {address}.")
+
     def has_place(self, place):
         key = ''.join(num for num in place.address[:4] if num.isdigit())
         if key == '': 
@@ -55,6 +70,7 @@ class PlacesHash:
         
         if self.has_place(place):
             self.hash[index].remove(place)
-            print("removed")
+            if not self.hash[index]:
+                self.hash[index] = None
         else:
             raise ValueError(f"Place with ID {place.id} not in hash, could not remove it.")
