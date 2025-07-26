@@ -87,16 +87,17 @@ heapq.heapify(packages_to_deliver)  # Priority queue that sorts the packages by 
 distance_graph = load_distance_graph(places)
 
 load_trucks(trucks, package_hash, packages_to_deliver)
-print_truck_contents(trucks)
-# print(package_hash)
-chris = christofides(places, distance_graph)
+# print_truck_contents(trucks)
+truck1_route = get_delivery_route(trucks[1].packages, places_hash)
 
-print("CHRISTOPHIDES")
-for node in chris:
-    print(f"{node}: {chris[node]}")
-
-for place in places:
-    print(f'Id: {place.id}, Name: {place.name}, Address: {place.address}')
+# for place in truck1_route:
+#     print(f'Id: {place.id}, Name: {place.name}, Address: {place.address}')
+    
+chris = christofides(truck1_route, distance_graph)
+print("CHRISTOFIDES")
+for node in chris[0]:
+    print(f"{node}: {chris[0][node]}")
+print(f"Weight: {chris[1]}")
 
 # # Print packages hash
 # for i, bucket in enumerate(package_hash.hash):

@@ -8,30 +8,51 @@ def get_mst(nodes_list, distance_graph):
     visited_nodes = set()
     possible_paths = []
     mst = {node.id:[] for node in nodes_list}  # An MST includes all the nodes in the graph. Initialize all the nodes in a dictionary without any connections.
-    print(mst)
-
-    # while we don't have connections between all the nodes
+    
+    # while we don't have connections between all the nodes. We don't actually need to visit all the nodes for all the nodes to be included.
     while len(visited_nodes) < len(nodes_list) - 1:
         visited_nodes.add(current_node)
+        print(f"Current node: {current_node}")
 
         # get the distances stored in the current node
-        for i, distance in enumerate(distance_graph[current_node]):
+        for destination in mst:
+            distance = distance_graph[current_node][destination]
             # do not add nodes connected to themselves or without paths
-            if distance != 0:
-                possible_paths.append([distance, current_node, i])
+            if distance != 0 and destination not in visited_nodes:
+                # print(destination)
+                possible_paths.append([distance, current_node, destination])
 
         heapq.heapify(possible_paths)  # the first element will always contain the smallest element
 
-        origin = possible_paths[0][1]
-        destination = possible_paths[0][2]
-        while destination in visited_nodes:
-            heapq.heappop(possible_paths)
+        # print(possible_paths)
+        print(visited_nodes)
+        print(f"visited nodes length: {len(visited_nodes)} vs., nodes list length: {len(nodes_list)}")
+
+        # origin = possible_paths[0][1]
+        # destination = possible_paths[0][2]
+        # while destination in visited_nodes:
+        #     # print(possible_paths)
+        #     heapq.heappop(possible_paths)
+        #     if possible_paths:
+        #         origin = possible_paths[0][1]
+        #         destination = possible_paths[0][2]
+
+        while possible_paths:
             origin = possible_paths[0][1]
             destination = possible_paths[0][2]
+            if origin == 6:
+                print(f"dest: {destination}, distance: {possible_paths[0][0]}")
+            if destination not in visited_nodes:
+                break
+            heapq.heappop(possible_paths)
         
         # draw a path between the two nodes that can be accessed through either of them
+        print(f"adding destination {destination}")
         mst[origin].append(destination)
         mst[destination].append(origin)
+
+        if not possible_paths:
+            break
 
         current_node = destination
         heapq.heappop(possible_paths)
@@ -178,14 +199,39 @@ def simplify_edges(distance_graph, eulerian_graph):
 
 # TODO: this
 # Copy and paste the code in is_disjoint and just return the total distance idfk, I actually don't know what the purpose of this one is.
-def traverse_graph():
-    pass
+def get_graph_weight(graph, distance_graph):
+    visited = set()
+    node = 0
+    node_with_end_connection = -1
+    weight = 0
+
+    while len(visited) < len(graph):
+        visited.add(node)
+        destination = graph[node][0]
+        if destination == 0: node_with_end_connection = node
+               
+        if destination in visited:
+            destination = graph[node][1]
+            if destination == 0: node_with_end_connection = node
+
+        # print(destination)
+        if destination in visited:
+            break
+
+        weight += distance_graph[node][destination]
+        node = destination
+
+    weight += distance_graph[0][node_with_end_connection]
+                
+    return weight
 
 
 def christofides(node_number, distance_graph):
     mst = get_mst(node_number, distance_graph)
+    print(mst)
     mpm = get_mpm(mst, distance_graph)
     eulerian = merge_graphs(mst, mpm)
     best_path = simplify_edges(distance_graph, eulerian)
+    weight = get_graph_weight(best_path, distance_graph)
 
-    return best_path
+    return (best_path, weight)

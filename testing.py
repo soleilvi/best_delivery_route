@@ -1,16 +1,35 @@
-from delivery import *
+from christofides import *
 
-packages_to_deliver = {1, 2, 3, 4, 5, 6, 7, 8}
-trucks = {1: Truck(1, TimeMod(8, 0)), 2: Truck(2, TimeMod(9, 30))}
+class Pee:
+    def __init__(self, id):
+        self.id = id
 
-length = 4
+distances1 = [[0, 1, 6, 3],
+              [1, 0, 5, 4],
+              [6, 5, 0, 8],
+              [3, 4, 8, 0]]
+distances2 = [[0, 2, 3, 3, 0, 0, 0],
+              [2, 0, 4, 0, 3, 0, 0],
+              [3, 4, 0, 5, 1, 6, 0],
+              [3, 0, 5, 0, 0, 7, 10],
+              [0, 3, 1, 0, 0, 8, 11],
+              [0, 0, 6, 7, 8, 0, 9],
+              [0, 0, 0, 10, 11, 9, 0]]
 
-while packages_to_deliver:
-        truck_to_load = len(packages_to_deliver) % length + 1
-        package = packages_to_deliver.pop()
-        print(f"truck to load {truck_to_load}")
-        print(f"other: {truck_to_load % length + 1}")
-        # if not trucks[truck_to_load].is_full():
-        #     trucks[truck_to_load].load_package(package)
-        # elif not trucks[(truck_to_load + 1) + 1]: 
-        #     trucks[(truck_to_load + 1) + 1].load_package(package)
+graph2 = {0: [1, 2, 3],
+          1: [0, 2, 4],
+          2: [0, 1, 3, 4, 5],
+          3: [0, 2, 5, 6],
+          4: [1, 2, 5, 6],
+          5: [2, 3, 4, 6],
+          6: [3, 4, 5]}
+
+graph2best = {0: [1, 3],
+              1: [0, 4],
+              2: [4, 5],
+              3: [0, 6],
+              4: [1, 2],
+              5: [2, 6],
+              6: [3, 5]}
+
+print(get_graph_weight(graph2best, distances2))
