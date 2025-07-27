@@ -278,16 +278,14 @@ def get_graph_weight(graph, distance_graph):
 
     while len(visited) < len(graph):
         visited.add(node)
-        destination = graph[node].pop()  # "Borrow" this value (can't peek on sets)
-        graph[node].add(destination)  # "Return" this value
+        connections = list(graph[node])
+        destination = connections[0]
         if destination == 0: node_with_end_connection = node
                
         if destination in visited:
-            graph[node].add(destination)
-            destination = graph[node].pop()
+            destination = connections[1]
             if destination == 0: node_with_end_connection = node
 
-        # print(destination)
         if destination in visited:
             break
 
@@ -313,6 +311,6 @@ def christofides(node_number, distance_graph):
     print("BEST PATH")
     for node in best_path:
         print(node, best_path[node])
-    weight = 0 # get_graph_weight(best_path, distance_graph)
+    weight = get_graph_weight(best_path, distance_graph)
 
     return (best_path, weight)
