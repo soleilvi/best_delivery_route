@@ -7,7 +7,7 @@ def get_mst(nodes_list, distance_graph):
     current_node = 0  # Starting node for the MST
     visited_nodes = set()
     possible_paths = []
-    mst = {node.id:[] for node in nodes_list}  # An MST includes all the nodes in the graph. Initialize all the nodes in a dictionary without any connections.
+    mst = {node.id:set() for node in nodes_list}  # An MST includes all the nodes in the graph. Initialize all the nodes in a dictionary without any connections.
     
     # while we don't have connections between all the nodes. We don't actually need to visit all the nodes for all the nodes to be included.
     while len(visited_nodes) < len(nodes_list) - 1:
@@ -48,8 +48,8 @@ def get_mst(nodes_list, distance_graph):
         
         # draw a path between the two nodes that can be accessed through either of them
         print(f"adding destination {destination}")
-        mst[origin].append(destination)
-        mst[destination].append(origin)
+        mst[origin].add(destination)
+        mst[destination].add(origin)
 
         if not possible_paths:
             break
@@ -106,9 +106,9 @@ def merge_graphs(mst, mpm):
         b = node_pair[1]
 
         if b not in mst[a]:
-            merged[a].append(b)
+            merged[a].add(b)
         if a not in merged[b]:
-            merged[b].append(a)    
+            merged[b].add(a)    
         
     return merged
 
@@ -131,11 +131,13 @@ def remove_single_edge_nodes(node_graph, distance_graph):
             destination = distances[0][1]
 
             # Verify that we're not just adding the same connection twice
-            print("the one single connection:", node_graph[node][0])
-            while destination == node_graph[node][0]:
+            single = node_graph[node].pop()  # We just need the one element to compare
+            print("the one single connection:", single)
+            while destination == single:
                 heapq.heappop(distances)
-            node_graph[node].append(destination)
-            node_graph[destination].append(node)
+            node_graph[node].add(single)
+            node_graph[node].add(destination)
+            node_graph[destination].add(node)
 
             distances = []
 
@@ -143,7 +145,7 @@ def remove_single_edge_nodes(node_graph, distance_graph):
 # For making the hamiltonian tour
 def is_disjoint(node_connection_dict, current_node, complete_node_count):
     visited_nodes = set()
-    unvisited_nodes = node_connection_dict[current_node].copy()  # stack
+    unvisited_nodes = list(node_connection_dict[current_node]) # stack
     print("unvisited nodes: ", unvisited_nodes)
     
     while unvisited_nodes:
@@ -167,13 +169,13 @@ def reconnect_nodes(node_connection_dict, n, x, y):
     print("In reconnect_nodes():", n, x, y)
     if n != x and n != y and x != y:
         node_connection_dict[x].remove(n)
-        node_connection_dict[x].append(y)
+        node_connection_dict[x].add(y)
 
         node_connection_dict[y].remove(n)
-        node_connection_dict[y].append(x)
+        node_connection_dict[y].add(x)
 
         node_connection_dict[n].remove(x)
-        node_connection_dict[n].remove(y)
+        node_connection_dict[n].add(y)
 
 
 # Make a hamiltonian tour out of the Eulerian tour
@@ -190,7 +192,7 @@ def simplify_edges(distance_graph, eulerian_graph):
     # 2) Get the distances between all the destination nodes and put them in a priority queue 
     while nodes_over_two_edges:
         node = nodes_over_two_edges.pop()
-        destination_nodes = node_connections[node]
+        destination_nodes = list(node_connections[node])
         destination_node_distances = []
         n = len(destination_nodes)
         i = n - 1
