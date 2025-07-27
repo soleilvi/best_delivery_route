@@ -118,26 +118,25 @@ def remove_single_edge_nodes(node_graph, distance_graph):
 
     for node in node_graph:
         # If a node only has one connection, connect it to the node with the shortest distance between them
-        if len(node_graph[node]) == 1:
+        if len(node_graph[node]) % 2 == 1:
             for destination in node_graph:
                 distance = distance_graph[node][destination]
                 if distance != 0:
                     distances.append([distance, destination])
 
             heapq.heapify(distances)
-            heapq.heappop(distances)  # Remove 0
+            # heapq.heappop(distances)  # Remove 0
             print("Heapq distances: ", distances)
 
             destination = distances[0][1]
 
             # Verify that we're not just adding the same connection twice
-            single = node_graph[node].pop()  # We just need the one element to compare
-            print("the one single connection:", single)
-            while destination == single:
+            # print("the one single connection:", node_graph[node])
+            while destination not in node_graph[node]:
                 heapq.heappop(distances)
-            node_graph[node].add(single)
             node_graph[node].add(destination)
-            node_graph[destination].add(node)
+            node_graph[destination].add(node)   # Uhhhh you may be creating more uneven edges!!!!!
+            print("Destinations with the new node added in: ", node_graph[node])
 
             distances = []
 
@@ -160,14 +159,16 @@ def is_disjoint(node_connection_dict, current_node, complete_node_count):
         current_node = unvisited_nodes.pop()
 
     print("visited nodes: ", visited_nodes)
-    print(complete_node_count)
     return len(visited_nodes) != complete_node_count
 
 
 # For nodes that have more than two connections, we want to make a direct path between its connections by replacing [(n, x), (n, y)] with [(x, y)]
 def reconnect_nodes(node_connection_dict, n, x, y):
     print("In reconnect_nodes():", n, x, y)
-    if n != x and n != y and x != y:
+    n_is_even = len(node_connection_dict[n]) % 2 == 0
+    x_is_even = len(node_connection_dict[x]) % 2 == 0
+
+    if n_is_even:
         node_connection_dict[x].remove(n)
         node_connection_dict[x].add(y)
 
@@ -175,7 +176,22 @@ def reconnect_nodes(node_connection_dict, n, x, y):
         node_connection_dict[y].add(x)
 
         node_connection_dict[n].remove(x)
-        node_connection_dict[n].add(y)
+        node_connection_dict[n].remove(y)
+    
+    # For nodes with uneven edges, we just want to remove one edge
+    else:
+        node_connection_dict[x].add(y)
+        node_connection_dict[y].add(x)
+        if x_is_even:
+            node_connection_dict[x].remove(n)
+            node_connection_dict[n].remove(x)
+        else:  # Even if they're both uneven, nothing would change with this result
+            node_connection_dict[y].remove(n)
+            node_connection_dict[n].remove(y)
+
+    print("New n: ", node_connection_dict[n])
+    print("New x: ", node_connection_dict[x])
+    print("New y: ", node_connection_dict[y])
 
 
 # Make a hamiltonian tour out of the Eulerian tour
@@ -209,39 +225,12 @@ def simplify_edges(distance_graph, eulerian_graph):
         heapq.heapify(destination_node_distances)
 
         # 3) Remove extra paths from the origin node by reconnecting those paths to the destinations with the smallest distance between them
-        # start_node = destination_node_distances[0][1]
-        # end_node = destination_node_distances[0][2]
-        # original_paths = {"node": node_connections[node].copy(), "start": node_connections[start_node].copy(), "end": node_connections[end_node].copy()}
-
-        # reconnect_nodes(node_connections, node, start_node, end_node)
-
-        # while is_disjoint(node_connections, start_node, len(node_connections)):
-        #     node_connections[node] = original_paths["node"].copy()
-        #     node_connections[start_node] = original_paths["start"].copy()
-        #     node_connections[end_node] = original_paths["end"].copy()
-
-        #     print(destination_node_distances)
-        #     heapq.heappop(destination_node_distances)
-        #     # if not destination_node_distances:
-        #     #     break
-
-        #     start_node = destination_node_distances[0][1]
-        #     end_node = destination_node_distances[0][2]
-        #     original_paths["start"] = node_connections[start_node].copy()
-        #     original_paths["end"] = node_connections[end_node].copy()
-
-        #     if node != start_node and node != end_node and start_node != end_node:
-        #         print("hello why is this here??")
-        #         reconnect_nodes(node_connections, node, start_node, end_node)
-        #     else:
-        #         heapq.heappop(destination_node_distances)
         tried_pairs = set()
-
         while destination_node_distances:
             start_node = destination_node_distances[0][1]
             end_node = destination_node_distances[0][2]
 
-            pair = (start_node, end_node)
+            pair = tuple(sorted((start_node, end_node)))  # Since edge weights don't depend on which node it starts on
             if pair in tried_pairs:
                 heapq.heappop(destination_node_distances)
                 continue  # necessary?
@@ -256,18 +245,22 @@ def simplify_edges(distance_graph, eulerian_graph):
             if node != start_node and node != end_node and start_node != end_node:
                 reconnect_nodes(node_connections, node, start_node, end_node)
 
-                if not is_disjoint(node_connections, start_node, len(node_connections)):
-                    break  # Successful reconnection
-                else:
-                    # Undo changes if disjoint
+                # Undo changes if disjoint, break if the reconnection was successful
+                if is_disjoint(node_connections, start_node, len(node_connections)):
                     node_connections[node] = original_paths["node"]
                     node_connections[start_node] = original_paths["start"]
                     node_connections[end_node] = original_paths["end"]
+                    print()
+                else:
+                    break 
+        
             else:
                 print("Skipping invalid or duplicate node pair")
                 print(f"The destinations of said pair: {destination_node_distances}")
 
             heapq.heappop(destination_node_distances)
+
+        print("CHANGE ACCEPTED")
 
         # 5) Repeat until the current start node only has two distances (add the node to the set again if the length is still over 2)
         if len(node_connections[node]) > 2:
@@ -285,11 +278,13 @@ def get_graph_weight(graph, distance_graph):
 
     while len(visited) < len(graph):
         visited.add(node)
-        destination = graph[node][0]
+        destination = graph[node].pop()  # "Borrow" this value (can't peek on sets)
+        graph[node].add(destination)  # "Return" this value
         if destination == 0: node_with_end_connection = node
                
         if destination in visited:
-            destination = graph[node][1]
+            graph[node].add(destination)
+            destination = graph[node].pop()
             if destination == 0: node_with_end_connection = node
 
         # print(destination)
@@ -310,14 +305,14 @@ def christofides(node_number, distance_graph):
     mpm = get_mpm(mst, distance_graph)
     print(mpm)
     eulerian = merge_graphs(mst, mpm)
-    remove_single_edge_nodes(eulerian, distance_graph)
+    # remove_single_edge_nodes(eulerian, distance_graph)
     print("EULERIAN")
     for node in eulerian:
         print(node, eulerian[node])
     best_path = simplify_edges(distance_graph, eulerian)
     print("BEST PATH")
     for node in best_path:
-        print(node, eulerian[node])
-    weight = get_graph_weight(best_path, distance_graph)
+        print(node, best_path[node])
+    weight = 0 # get_graph_weight(best_path, distance_graph)
 
     return (best_path, weight)
