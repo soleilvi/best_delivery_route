@@ -84,15 +84,15 @@ heapq.heapify(packages_to_deliver)  # Priority queue that sorts the packages by 
 #     print(package.id, package.deadline.time_to_str())
 
 distance_graph = load_distance_graph(places)
-# Print distance table
-print("    ", end="")
-for i, row in enumerate(distance_graph):
-    if i < len(distance_graph) - 2:
-        print(i, " ", end="")
-    else:
-        print(i, " ")
-for i, row in enumerate(distance_graph):
-    print(i, ": ", row)
+# # Print distance table
+# print("    ", end="")
+# for i, row in enumerate(distance_graph):
+#     if i < len(distance_graph) - 2:
+#         print(i, " ", end="")
+#     else:
+#         print(i, " ")
+# for i, row in enumerate(distance_graph):
+#     print(i, ": ", row)
 
 load_trucks(trucks, package_hash, packages_to_deliver)
 # print_truck_contents(trucks)
