@@ -58,7 +58,7 @@ class PlacesHash:
         if self.has_place(place):
             return place
         else:
-            raise ValueError(f"Place with ID {place.id} not in hash, could not retrieve it.")
+            raise ValueError(f"Place not in hash, could not retrieve it.")
     
     def remove(self, place):
         key = ''.join(num for num in place.address[:4] if num.isdigit())
@@ -73,4 +73,4 @@ class PlacesHash:
             if not self.hash[index]:
                 self.hash[index] = None
         else:
-            raise ValueError(f"Place with ID {place.id} not in hash, could not remove it.")
+            raise ValueError(f"Place not in hash, could not remove it.")
