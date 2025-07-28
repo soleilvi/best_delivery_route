@@ -3,11 +3,11 @@ import heapq
 # TODO: would it be good to make a dictionary that includes the distance as well as the node...?
 
 # Calculate the minimum spanning tree (MST) using Prim's algorithm
-def get_mst(nodes_list, distance_graph):
-    current_node = 0  # Starting node for the MST
+def get_mst(nodes_list, distance_graph, places):
+    current_node = places.get(places.address_to_place("HUB"))  # Starting node for the MST
     visited_nodes = set()
     possible_paths = []
-    mst = {node.id:set() for node in nodes_list}  # An MST includes all the nodes in the graph. Initialize all the nodes in a dictionary without any connections.
+    mst = {node:set() for node in nodes_list}  # An MST includes all the nodes in the graph. Initialize all the nodes in a dictionary without any connections.
     
     # while we don't have connections between all the nodes. We don't actually need to visit all the nodes for all the nodes to be included.
     while len(visited_nodes) < len(nodes_list) - 1:
@@ -15,7 +15,7 @@ def get_mst(nodes_list, distance_graph):
 
         # get the distances stored in the current node
         for destination in mst:
-            distance = distance_graph[current_node][destination]
+            distance = distance_graph[current_node.id][destination.id]
             # do not add nodes connected to themselves or without paths
             if distance != 0 and destination not in visited_nodes:
                 possible_paths.append([distance, current_node, destination])
@@ -58,7 +58,7 @@ def get_mpm(node_graph, distance_graph):
     for origin in uneven_nodes:
         unseen.remove(origin)
         for destination in unseen:
-            distance = distance_graph[origin][destination]
+            distance = distance_graph[origin.id][destination.id]
             if distance != 0:
                 node_distances.append((distance, origin, destination))
 
@@ -163,7 +163,7 @@ def simplify_edges(distance_graph, eulerian_graph):
         for start_node in destination_nodes:
             # Prevent revisiting the same path several times and make runtime slightly faster with [(n-i):]
             for end_node in destination_nodes[(n-i):]:
-                destination_node_distances.append((distance_graph[start_node][end_node], start_node, end_node))  # Distance between start and end nodes
+                destination_node_distances.append((distance_graph[start_node.id][end_node.id], start_node, end_node))  # Distance between start and end nodes
             i -= 1
 
         heapq.heapify(destination_node_distances)
@@ -209,9 +209,9 @@ def simplify_edges(distance_graph, eulerian_graph):
     return node_connections
 
 # Add up the distance of all the paths in the graph to get the weight. Only works with hamiltonian tour graphs.
-def get_graph_weight(graph, distance_graph):
+def get_graph_weight(graph, distance_graph, places):
     visited = set()
-    node = 0
+    node = places.get(places.address_to_place("HUB"))
     node_with_end_connection = -1
     weight = 0
 
@@ -219,28 +219,28 @@ def get_graph_weight(graph, distance_graph):
         visited.add(node)
         connections = list(graph[node])
         destination = connections[0]
-        if destination == 0: node_with_end_connection = node
+        if destination.id == 0: node_with_end_connection = node
                
         if destination in visited:
             destination = connections[1]
-            if destination == 0: node_with_end_connection = node
+            if destination.id == 0: node_with_end_connection = node
 
         if destination in visited:
             break
 
-        weight += distance_graph[node][destination]
+        weight += distance_graph[node.id][destination.id]
         node = destination
 
-    weight += distance_graph[0][node_with_end_connection]
+    weight += distance_graph[0][node_with_end_connection.id]
                 
     return weight
 
 
-def christofides(node_number, distance_graph):
-    mst = get_mst(node_number, distance_graph)
+def christofides(node_number, distance_graph, places):
+    mst = get_mst(node_number, distance_graph, places)
     mpm = get_mpm(mst, distance_graph)
     eulerian = merge_graphs(mst, mpm)
     best_path = simplify_edges(distance_graph, eulerian)
-    weight = get_graph_weight(best_path, distance_graph)
+    weight = get_graph_weight(best_path, distance_graph, places)
 
     return (best_path, weight)
