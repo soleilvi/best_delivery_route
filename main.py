@@ -95,16 +95,21 @@ distance_graph = load_distance_graph(places)
 #     print(i, ": ", row)
 
 load_trucks(trucks, package_hash, packages_to_deliver)
-# print_truck_contents(trucks)
-truck1_route = get_delivery_route(trucks[1].packages, places_hash)
-truck2_route = get_delivery_route(trucks[2].packages, places_hash)
-print(truck1_route)
-truck1_christofides = christofides(truck1_route, distance_graph, places_hash)
-truck2_christofides = christofides(truck2_route, distance_graph, places_hash)
+print_truck_contents(trucks)
+truck1_route_info = get_delivery_route(trucks[1].packages, places_hash)
+truck2_route_info = get_delivery_route(trucks[2].packages, places_hash)
+
+truck1_christofides = christofides(truck1_route_info[0], distance_graph, places_hash)
+truck2_christofides = christofides(truck2_route_info[0], distance_graph, places_hash)
+
 truck1_route = truck1_christofides[0]
 truck2_route = truck2_christofides[0]
+
 truck1_distance = truck1_christofides[1]
 truck2_distance = truck2_christofides[1]
+
+where_to_unload1 = truck1_route_info[1]
+where_to_unload2 = truck2_route_info[1]
 
 # for place in truck1_route:
 #     print(f'Id: {place.id}, Name: {place.name}, Address: {place.address}')
@@ -128,6 +133,15 @@ for place in truck2_route:
         else:
             print(p.id)
 print(f"Weight: {truck2_distance}")
+
+# print("PLACES TO UNLOAD")
+# for key in where_to_unload1:
+#     print("Place: ", key.id)
+#     for package in where_to_unload1[key]:
+#         print("Packages: ", package.id)
+
+deliver_packages(truck1_route, where_to_unload1, distance_graph, trucks[1], places_hash)
+deliver_packages(truck2_route, where_to_unload2, distance_graph, trucks[2], places_hash)
 
 # # Print packages hash
 # for i, bucket in enumerate(package_hash.hash):

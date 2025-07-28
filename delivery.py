@@ -96,42 +96,61 @@ def load_trucks(trucks: list, packages: PackageHash, packages_to_deliver: list):
 
 
 # Get a list of all the places the truck will need to visit to deliver the packages. 
-# Does the list order matter?
+# Does the list order matter? Probably not, if...
+# TODO: make a path first with all the nodes that need to be delivered by a certain deadline.
 def get_delivery_route(packages: list, places: PlacesHash):    
     route = {places.get(places.address_to_place("HUB"))}
+    where_to_deliver = {}
     # 1) Loop over packages to retrieve the address of each of their destinations. Put them in a set to avoid repeats.
     for package in packages:
         destination = places.get(places.address_to_place(package.address))
         route.add(destination)
+        where_to_deliver.setdefault(destination, []).append(package)  # Essentially an if-statement to check if the dictionary has a list before appending the value
 
     # 2) Return list
-    return route
+    return route, where_to_deliver
     
 
 # Show update messages and track time with this
-def deliver_packages(route: dict, distances: list, truck: Truck):
-    time = TimeMod()
-    current_node = 0
-    previous_node = -1
-    next_node = route[current_node][0]
+def deliver_packages(route: dict, where_to_deliver: dict, distances: list, truck: Truck, places: PlacesHash):
+    current_time = truck.depart_time
+    previous_place = places.get(places.address_to_place("HUB"))  # Delivery facility, or node 0
+    current_place = list(route[previous_place])[0]
+    for place in route[current_place]:
+        if place.id != 0:
+            next_place = place
+            break
     total_distance = 0
     
-    while next_node != 0:
+    while next_place.id != 0:
+        print(f"At place {current_place.id}")
         # 1) Add distance to total_distance
-        total_distance +=  distances[current_node][next_node]
+        total_distance +=  distances[previous_place.id][current_place.id]
 
-        # 2) Unload packages
+        # 2) Translate distance to time
+        temp = TimeMod()
+        temp.distance_to_time(total_distance, truck.speed)
+        current_time = current_time.add_time(temp)
 
-        # 3) Translate distance to time
-        time.distance_to_time(total_distance, truck.SPEED)
+        # 3) Unload packages
+        packages = where_to_deliver[current_place]
+        for package in packages:
+            print(f"Unloading package with ID {package.id}")
+            truck.unload_package(package)
 
-        # 4) Show message
-        print(f"Delivered package (package_id) (on time, late, etc) to (place) at {time.time_to_str}")
+            # TODO: Overload < and <= operator on TimeMod objects as well?
+            if current_time.is_less_than(package.deadline) or current_time.is_equal_to(package.deadline):
+                time_status = "on time"
+            else: 
+                time_status = "late"
+
+            # 4) Show message
+            print(f"Delivered package {package.id} {time_status} to {current_place.name.replace('\n', '')} at {current_time.time_to_str()}")
 
         # 5) Reconnect nodes
-        previous_node = current_node
-        current_node = next_node
-        for destination in route[current_node]:
-            if destination != previous_node:
-                next_node = destination
+        previous_place = current_place
+        current_place = next_place
+        for destination in route[current_place]:
+            if destination != previous_place:
+                next_place = destination
                 break

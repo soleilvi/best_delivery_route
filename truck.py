@@ -26,6 +26,14 @@ class Truck:
             current_load = len(self.packages)
             self.packages.discard(package_set)
             raise OverflowError(f"Truck is full. Maximum size is {self.capacity}, current load is {len(self.packages)}")
+        
+    def unload_package(self, package):
+        if not self.packages:
+            raise KeyError(f"The truck is empty, could not remove package.")
+        elif not self.has_package(package):
+            raise KeyError(f"The package set to be unloaded is not in the truck.")
+        else:
+            self.packages.remove(package)
 
     def has_package(self, package):
         if isinstance(package, int):
