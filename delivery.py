@@ -98,17 +98,67 @@ def load_trucks(trucks: list, packages: PackageHash, packages_to_deliver: list):
 # Get a list of all the places the truck will need to visit to deliver the packages. 
 # Does the list order matter? Probably not, if...
 # TODO: make a path first with all the nodes that need to be delivered by a certain deadline.
-def get_delivery_route(packages: list, places: PlacesHash):    
-    route = {places.get(places.address_to_place("HUB"))}
-    where_to_deliver = {}
+def get_delivery_details(packages: list, places: PlacesHash):    
+    hub = places.get(places.address_to_place("HUB"))
+    route = [{hub}, {hub}]  # Packages that have a deadline are on the first list, the rest are in the second
+    where_to_deliver = {}  # Holds information for where to deliver packages
+
     # 1) Loop over packages to retrieve the address of each of their destinations. Put them in a set to avoid repeats.
     for package in packages:
         destination = places.get(places.address_to_place(package.address))
-        route.add(destination)
-        where_to_deliver.setdefault(destination, []).append(package)  # Essentially an if-statement to check if the dictionary has a list before appending the value
 
-    # 2) Return list
+        # 2) Separate the packages that have a deadline from the ones that don't
+        if package.deadline.is_less_than(TimeMod(23, 59)):  # If the package has a deadline that isn't EOD
+            route[0].add(destination)
+        else:
+            route[1].add(destination)
+
+        where_to_deliver.setdefault(destination, []).append(package)  # Essentially an if-statement to check if the dictionary has a list before appending the value
+    
+    #3) If there are any duplicates, remove them
+    for place in route[0]:
+        if place in route[1] and place != hub:
+            route[1].remove(place)
+
     return route, where_to_deliver
+
+
+# Connects the priority package route with the non-priority one
+def connect_paths(priority_route: dict, regular_route: dict, distances: list, places: PlacesHash):
+    hub = places.get(places.address_to_place("HUB"))
+    priority_connections = list(priority_route[hub])
+    regular_connections = list(regular_route[hub])
+    minimum = 1000
+    
+    # 1) Compare the distances between the nodes that connect to the hub in the two lists 
+    for i in range(4):
+        j = 0
+        if i >= 2:
+            j = 1
+        p = priority_connections[j]  # Connection to the hub from the priority route
+        r = regular_connections[i % 2]  # Connection to the hub from the regular route
+         
+        if distances[p.id][r.id] < minimum:
+            minimum = distances[p.id][r.id]
+
+            # p and r may not have the values that align with the minimum distance by the end of the loop, so we need new variables
+            x = p 
+            y = r
+
+    # 2) Connect the nodes from the two different routes that have the least distance between them
+    priority_route[hub].remove(x)
+    regular_route[hub].remove(y)
+
+    priority_route[x].remove(hub)
+    priority_route[x].add(y)
+
+    regular_route[y].remove(hub)
+    regular_route[y].add(x)
+
+    priority_route[hub].update(regular_route[hub])  # Merge the connections of the hub in each route
+    regular_route.update(priority_route)  # Merge the two dictionaries
+    
+    return regular_route  # I know that this is accessible through regular_route, but it's so that it makes more sense in the main function
     
 
 # Show update messages and track time with this
