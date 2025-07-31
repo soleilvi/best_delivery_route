@@ -101,16 +101,9 @@ def load_trucks(trucks: list, packages: PackageHash, packages_to_deliver: list):
                     elif trucks[id].packages & set:
                         trucks[id].packages -= trucks[id].packages & set
 
-                
-
-        # 4) Add package based on time priority. Since packages_to_deliver is a priority queue based on delivery time, we just need to worry about whether the truck is full.
-        # TODO: Change this so that packages that need to be delivered at 10:30 are put on the late truck. Keep in mind the packages that need to be linked together (I think that is already handled earlier?)
+        # 4) Add package based on time priority. Since packages_to_deliver is a priority queue based on delivery time, we just need to worry about deadines and whether the truck is full.
         # Alternate between each truck getting loaded up to distribute the deadline packages evenly
         if not note:  # Making sure the package was not removed previously
-            # if not early_truck.is_full():
-            #     early_truck.load_package(package)
-            # elif not late_truck.is_full():
-            #     late_truck.load_package(package)
             if load_late_truck and not late_truck.is_full() and late_truck.depart_time.is_less_than(package.deadline):
                 print(f"loading {package.id} into late truck")
                 late_truck.load_package(package)
@@ -123,7 +116,6 @@ def load_trucks(trucks: list, packages: PackageHash, packages_to_deliver: list):
 
 
 # Get a list of all the places the truck will need to visit to deliver the packages. 
-# Does the list order matter? Probably not, if...
 def get_delivery_details(packages: list, places: PlacesHash):    
     hub = places.get(places.address_to_place("HUB"))
     route = [{hub}, {hub}]  # Packages that have a deadline are on the first list, the rest are in the second
