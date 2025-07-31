@@ -36,7 +36,9 @@ def load_trucks(trucks: list, packages: PackageHash, packages_to_deliver: list):
     deliver_together = []  # Will contain sets with the IDs of packages that need to be delivered together
     early_truck = trucks[1] # Truck that leaves when the shift starts
     late_truck = trucks[2] # Truck that waits for late packages
-    
+    load_late_truck = True
+    linked_truck = None
+
     while packages_to_deliver and not (early_truck.is_full() and late_truck.is_full()):
         package = packages_to_deliver[0]
         # 1) Identify which packages have special notes 
@@ -75,29 +77,53 @@ def load_trucks(trucks: list, packages: PackageHash, packages_to_deliver: list):
 
         # 3) Add any packages that we have identified are linked together
         for set in deliver_together:
-            for package in set:
-                if early_truck.has_package(package):
-                    early_truck.load_packages(set)
-                    deliver_together.remove(set)
-                    break
-                elif late_truck.has_package(package):
-                    late_truck.load_packages(set)
-                    deliver_together.remove(set)
-                    break
+            # 
+            if linked_truck is None:
+                for package in set:
+                    if early_truck.has_package(package):
+                        early_truck.load_packages(set)
+                        deliver_together.remove(set)
+                        linked_truck = early_truck
+                        break
+                    elif late_truck.has_package(package):
+                        late_truck.load_packages(set)
+                        deliver_together.remove(set)
+                        linked_truck = late_truck
+                        break
+            else:
+                linked_truck.load_packages(set)
+
+                # If any of the linked packages were loaded onto the wrong truck before, we should remove them
+                for id in trucks:
+                    if trucks[id] == linked_truck:
+                        continue
+                    # Remove the element(s) in common between the wrong truck's packages and the linked packages
+                    elif trucks[id].packages & set:
+                        trucks[id].packages -= trucks[id].packages & set
+
+                
 
         # 4) Add package based on time priority. Since packages_to_deliver is a priority queue based on delivery time, we just need to worry about whether the truck is full.
+        # TODO: Change this so that packages that need to be delivered at 10:30 are put on the late truck. Keep in mind the packages that need to be linked together (I think that is already handled earlier?)
+        # Alternate between each truck getting loaded up to distribute the deadline packages evenly
         if not note:  # Making sure the package was not removed previously
-            if not early_truck.is_full():
+            # if not early_truck.is_full():
+            #     early_truck.load_package(package)
+            # elif not late_truck.is_full():
+            #     late_truck.load_package(package)
+            if load_late_truck and not late_truck.is_full() and late_truck.depart_time.is_less_than(package.deadline):
+                print(f"loading {package.id} into late truck")
+                late_truck.load_package(package)
+                load_late_truck = False
+            elif not early_truck.is_full():
                 early_truck.load_package(package)
-            elif not late_truck.is_full():
-                late_truck.load_package(package) 
+                load_late_truck = True
 
         heapq.heappop(packages_to_deliver)
 
 
 # Get a list of all the places the truck will need to visit to deliver the packages. 
 # Does the list order matter? Probably not, if...
-# TODO: make a path first with all the nodes that need to be delivered by a certain deadline.
 def get_delivery_details(packages: list, places: PlacesHash):    
     hub = places.get(places.address_to_place("HUB"))
     route = [{hub}, {hub}]  # Packages that have a deadline are on the first list, the rest are in the second

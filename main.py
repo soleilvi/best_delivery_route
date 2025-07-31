@@ -102,6 +102,16 @@ truck2_route_info = get_delivery_details(trucks[2].packages, places_hash)
 where_to_unload1 = truck1_route_info[1]
 where_to_unload2 = truck2_route_info[1]
 
+print(truck1_route_info[0])
+
+print("TRUCK 1 ROUTE PRIORITY")
+for place in truck1_route_info[0][0]:
+    print(f"{place.id}")
+
+print("TRUCK 1 ROUTE REGULAR")
+for place in truck1_route_info[0][1]:
+    print(f"{place.id}")
+
 truck1_priority_route = christofides(truck1_route_info[0][0], distance_graph, places_hash)
 truck2_priority_route = christofides(truck2_route_info[0][0], distance_graph, places_hash)
 
