@@ -31,5 +31,3 @@ graph2best = {0: [1, 3],
               4: [1, 2],
               5: [2, 6],
               6: [3, 5]}
-
-print(get_graph_weight(graph2best, distances2))

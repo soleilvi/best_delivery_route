@@ -116,8 +116,10 @@ def is_disjoint(node_connection_dict, current_node, complete_node_count):
 
 # For nodes that have more than two connections, we want to make a direct path between its connections by replacing [(n, x), (n, y)] with [(x, y)]
 def reconnect_nodes(node_connection_dict, n, x, y):
+    print("n is ", n.id, ", x is ", x.id, ", y is ", y.id)
     n_is_even = len(node_connection_dict[n]) % 2 == 0
     x_is_even = len(node_connection_dict[x]) % 2 == 0
+    y_is_even = len(node_connection_dict[y]) % 2 == 0
 
     if n_is_even:
         node_connection_dict[x].remove(n)
@@ -131,8 +133,17 @@ def reconnect_nodes(node_connection_dict, n, x, y):
     
     # For nodes with uneven edges, we just want to remove one edge
     else:
+        # Prevents reconnecting nodes that are already fine
+        connections = node_connection_dict[n].copy()
+        while x_is_even and y_is_even and connections:
+            connections.remove(x)
+            connections.remove(y)
+            y =  connections.pop()
+            y_is_even = len(node_connection_dict[y]) % 2 == 0
+
         node_connection_dict[x].add(y)
         node_connection_dict[y].add(x)
+
         if x_is_even:
             node_connection_dict[x].remove(n)
             node_connection_dict[n].remove(x)
@@ -153,6 +164,7 @@ def simplify_edges(distance_graph, eulerian_graph):
 
     # 2) Get the distances between all the destination nodes and put them in a priority queue 
     while nodes_over_two_edges:
+        print("on node", node.id)
         node = nodes_over_two_edges.pop()
         destination_nodes = list(node_connections[node])
         destination_node_distances = []
@@ -185,6 +197,7 @@ def simplify_edges(distance_graph, eulerian_graph):
                 "end": node_connections[end_node].copy()
             }
 
+            # Prevent duplicate nodes with the if-statement
             if node != start_node and node != end_node and start_node != end_node:
                 reconnect_nodes(node_connections, node, start_node, end_node)
 
@@ -240,7 +253,23 @@ def christofides(node_number, distance_graph, places):
     mst = get_mst(node_number, distance_graph, places)
     mpm = get_mpm(mst, distance_graph)
     eulerian = merge_graphs(mst, mpm)
+    print("EULERIAN")
+    for place in eulerian:
+        print(f"{place.id}: ", end="")
+        for i, p in enumerate(eulerian[place]):
+            if i < len(eulerian[place]) - 1:
+                print(f"{p.id}, ", end="")
+            else:
+                print(p.id)
     best_path = simplify_edges(distance_graph, eulerian)
+    print("BEST PATH")
+    for place in best_path:
+        print(f"{place.id}: ", end="")
+        for i, p in enumerate(best_path[place]):
+            if i < len(best_path[place]) - 1:
+                print(f"{p.id}, ", end="")
+            else:
+                print(p.id)
     weight = get_graph_weight(best_path, distance_graph, places)
 
     return (best_path, weight)
