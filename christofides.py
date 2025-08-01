@@ -253,23 +253,7 @@ def christofides(node_number, distance_graph, places):
     mst = get_mst(node_number, distance_graph, places)
     mpm = get_mpm(mst, distance_graph)
     eulerian = merge_graphs(mst, mpm)
-    print("EULERIAN")
-    for place in eulerian:
-        print(f"{place.id}: ", end="")
-        for i, p in enumerate(eulerian[place]):
-            if i < len(eulerian[place]) - 1:
-                print(f"{p.id}, ", end="")
-            else:
-                print(p.id)
     best_path = simplify_edges(distance_graph, eulerian)
-    print("BEST PATH")
-    for place in best_path:
-        print(f"{place.id}: ", end="")
-        for i, p in enumerate(best_path[place]):
-            if i < len(best_path[place]) - 1:
-                print(f"{p.id}, ", end="")
-            else:
-                print(p.id)
     weight = get_graph_weight(best_path, distance_graph, places)
 
     return (best_path, weight)
