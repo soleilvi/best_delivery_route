@@ -246,7 +246,6 @@ def deliver_packages(route: dict, where_to_deliver: dict, distances: list, truck
             print(f"Unloading package with ID {package.id}.")
             truck.unload_package(package)
 
-            # TODO: Overload < and <= operator on TimeMod objects as well?
             if current_time <= package.deadline:
                 time_status = "on time"
             else: 
