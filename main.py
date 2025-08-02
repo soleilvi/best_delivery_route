@@ -128,7 +128,8 @@ for i, route in enumerate(truck2_route_info[0]):
 
 truck1_full_route = connect_paths(routes1[0], routes1[1], distance_graph, places_hash)
 truck1_full_route = connect_paths(routes1[2], truck1_full_route, distance_graph, places_hash)
-# truck2_full_route = connect_paths(truck2_priority_route[0], truck2_regular_route[0], distance_graph, places_hash)
+truck2_full_route = connect_paths(routes2[0], routes2[1], distance_graph, places_hash)
+
 
 print("TRUCK 1 ROUTE UPDATED")
 for place in truck1_full_route:
@@ -139,14 +140,14 @@ for place in truck1_full_route:
         else:
             print(p.id)
 
-# print("TRUCK 2 ROUTE UPDATED")
-# for place in truck2_full_route:
-#     print(f"{place.id}: ", end="")
-#     for i, p in enumerate(truck2_full_route[place]):
-#         if i < len(truck2_full_route[place]) - 1:
-#             print(f"{p.id}, ", end="")
-#         else:
-#             print(p.id)
+print("TRUCK 2 ROUTE UPDATED")
+for place in truck2_full_route:
+    print(f"{place.id}: ", end="")
+    for i, p in enumerate(truck2_full_route[place]):
+        if i < len(truck2_full_route[place]) - 1:
+            print(f"{p.id}, ", end="")
+        else:
+            print(p.id)
 
 # for place in truck1_route:
 #     print(f'Id: {place.id}, Name: {place.name}, Address: {place.address}')
@@ -160,7 +161,7 @@ for place in truck1_full_route:
 print("TRUCK 1 DELIVERY:")
 deliver_packages(truck1_full_route, where_to_unload1, distance_graph, trucks[1], places_hash)
 print("\nTRUCK 2 DELIVERY")
-# deliver_packages(truck2_full_route, where_to_unload2, distance_graph, trucks[2], places_hash)
+deliver_packages(truck2_full_route, where_to_unload2, distance_graph, trucks[2], places_hash)
 
 # # Print packages hash
 # for i, bucket in enumerate(package_hash.hash):

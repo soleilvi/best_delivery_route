@@ -212,14 +212,22 @@ def connect_paths(priority_route: dict, regular_route: dict, distances: list, pl
 # TODO: reach the final place!!!
 def deliver_packages(route: dict, where_to_deliver: dict, distances: list, truck: Truck, places: PlacesHash):
     current_time = truck.depart_time
+    total_distance = 0
     previous_place = places.get(places.address_to_place("HUB"))  # Delivery facility, or node 0
-    # TODO: make sure to start from the path with the priority packages
-    current_place = list(route[previous_place])[0]
+
+    # Find the node that will start the priority path
+    minimum = TimeMod(23, 59)
+    for connection in route[previous_place]:
+        for package in where_to_deliver[connection]:
+            print("current connection:", connection.id, "package", package.id)
+            if package.deadline < minimum:
+                minimum = package.deadline
+                current_place = connection
+
     for place in route[current_place]:
         if place.id != 0:
             next_place = place
             break
-    total_distance = 0
     
     while next_place.id != 0:
         print(f"At place {current_place.id}")
@@ -230,7 +238,6 @@ def deliver_packages(route: dict, where_to_deliver: dict, distances: list, truck
 
         # 2) Translate distance to time
         temp = TimeMod()
-        # TODO: ok you should check if it is converting to time correctly
         temp.distance_to_time(distance, truck.speed)
         current_time = current_time.add_time(temp)
 
