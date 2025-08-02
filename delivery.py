@@ -116,8 +116,7 @@ def load_trucks(trucks: list, packages: PackageHash, packages_to_deliver: list):
 def get_delivery_details(packages: list, places: PlacesHash):    
     hub = places.get(places.address_to_place("HUB"))
     eod = TimeMod(23,59)
-    routes = {eod.time_to_str(): {hub}}  # Different routes according to each package deadline
-    min_time = eod
+    routes = {eod.time_to_str(): set()}  # Different routes according to each package deadline
     where_to_deliver = {}  # Holds information for where to deliver packages
 
     # 1) Loop over packages to retrieve the address of each of their destinations. Put them in a set to avoid repeats.
@@ -125,33 +124,30 @@ def get_delivery_details(packages: list, places: PlacesHash):
         destination = places.get(places.address_to_place(package.address))
         deadline = package.deadline.time_to_str()
 
-        # 2) Separate the packages that have a deadline from the ones that don't
-        if deadline in routes:  # If the package has a deadline that isn't EOD
+        # 2) Set each package into the route that corresponds with its deadline
+        if deadline in routes:
             routes[deadline].add(destination)
         else:
             print("package:", package.id, ", deadline:", deadline)
-            routes[deadline] = {hub, destination}
-            # deadlines.append(package.deadline)
-            if package.deadline < min_time:
-                min_time = package.deadline
+            routes[deadline] = {destination}
 
         where_to_deliver.setdefault(destination, []).append(package)  # Essentially an if-statement to check if the dictionary has a list before appending the value
 
-    print("minimum:", min_time.time_to_str())
+    # Sorting the keys to return a list of the routes that is also sorted
+    keys = list(routes.keys())
+    keys.sort()
     
     #3) If there are any duplicates, remove them
-    for place in routes[min_time.time_to_str()]:
-        for key in routes:
-            if key == min_time.time_to_str():
-                continue
-            if place in routes[key] and place != hub:
-                routes[key].remove(place)
+    for i, key in enumerate(keys[1:], start=1):
+        previous_key = keys[i - 1]
+        # Remove the intersections between the current and previous paths
+        if routes[key] & routes[previous_key]:
+            routes[key] -= routes[key] & routes[previous_key]
 
     # 4) Only return the values. Make sure they are in order according to their corresponding deadline.
     routes_list = []
-    keys = list(routes.keys())
-    keys.sort()
     for key in keys:
+        routes[key].add(hub)
         routes_list.append(routes[key])
 
     return routes_list, where_to_deliver
@@ -213,6 +209,7 @@ def connect_paths(priority_route: dict, regular_route: dict, distances: list, pl
     
 
 # Show update messages and track time with this
+# TODO: reach the final place!!!
 def deliver_packages(route: dict, where_to_deliver: dict, distances: list, truck: Truck, places: PlacesHash):
     current_time = truck.depart_time
     previous_place = places.get(places.address_to_place("HUB"))  # Delivery facility, or node 0
