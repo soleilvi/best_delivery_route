@@ -209,7 +209,6 @@ def connect_paths(priority_route: dict, regular_route: dict, distances: list, pl
     
 
 # Show update messages and track time with this
-# TODO: reach the final place!!!
 def deliver_packages(route: dict, where_to_deliver: dict, distances: list, truck: Truck, places: PlacesHash):
     current_time = truck.depart_time
     total_distance = 0
@@ -229,7 +228,7 @@ def deliver_packages(route: dict, where_to_deliver: dict, distances: list, truck
             next_place = place
             break
     
-    while next_place.id != 0:
+    while current_place.id != 0:
         print(f"At place {current_place.id}")
         # 1) Add distance to total_distance
         distance = distances[previous_place.id][current_place.id]
@@ -244,7 +243,7 @@ def deliver_packages(route: dict, where_to_deliver: dict, distances: list, truck
         # 3) Unload packages
         packages = where_to_deliver[current_place]
         for package in packages:
-            print(f"Unloading package with ID {package.id}")
+            print(f"Unloading package with ID {package.id}.")
             truck.unload_package(package)
 
             # TODO: Overload < and <= operator on TimeMod objects as well?
@@ -254,7 +253,7 @@ def deliver_packages(route: dict, where_to_deliver: dict, distances: list, truck
                 time_status = "late"
 
             # 4) Show message
-            print(f"Delivered package {package.id} {time_status} to {current_place.name.replace('\n', '')} at {current_time.time_to_str()}")
+            print(f"Delivered package {package.id} {time_status} to {current_place.name.replace('\n', '')} at {current_time.time_to_str()}.")
 
         # 5) Reconnect nodes
         previous_place = current_place
@@ -263,4 +262,13 @@ def deliver_packages(route: dict, where_to_deliver: dict, distances: list, truck
             if destination != previous_place:
                 next_place = destination
                 break
+        
+    # We also need to count the distance and time taken by the truck to return to the warehouse
+    distance = distances[previous_place.id][current_place.id]
+    total_distance +=  distance
+    temp = TimeMod()
+    temp.distance_to_time(distance, truck.speed)
+    current_time = current_time.add_time(temp)
+    print(f"Returned to the warehouse at {current_time.time_to_str()}.")
+
     print("DISTANCE COVERED: ", total_distance)
