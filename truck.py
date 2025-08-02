@@ -47,3 +47,13 @@ class Truck:
             if package in self.packages:
                 return True
         return False
+    
+    def get_package(self, package):
+        if isinstance(package, int):
+            for _package in self.packages:
+                if _package.id == package:
+                    return _package
+        else:
+            if package in self.packages:
+                return package
+        raise KeyError(f"The package you are looking for is not in the truck.")

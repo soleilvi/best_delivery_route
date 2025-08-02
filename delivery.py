@@ -134,7 +134,6 @@ def get_delivery_details(packages: list, places: PlacesHash):
         if deadline in routes:
             routes[deadline].add(destination)
         else:
-            print("package:", package.id, ", deadline:", deadline)
             routes[deadline] = {destination}
 
         where_to_deliver.setdefault(destination, []).append(package)  # Essentially an if-statement to check if the dictionary has a list before appending the value
@@ -215,7 +214,6 @@ def connect_paths(priority_route: dict, regular_route: dict, distances: list, pl
     
 
 # Show update messages and track time with this
-# TODO: Correct the address for package 9 here
 def deliver_packages(route: dict, where_to_deliver: dict, distances: list, truck: Truck, places: PlacesHash):
     current_time = truck.depart_time
     total_distance = 0
@@ -238,21 +236,30 @@ def deliver_packages(route: dict, where_to_deliver: dict, distances: list, truck
             next_place = place
             break
     
+    # For the package that has a wrong address
+    if truck.has_package(9):
+        change_address = True
+    else:
+        change_address = False
+
     while current_place.id != 0:
         print(f"At place with ID {current_place.id}")
         # 1) Add distance to total_distance
         distance = distances[previous_place.id][current_place.id]
         total_distance +=  distance
-        # print("Distance travelled:", distance)
 
         # 2) Translate distance to time
         temp = TimeMod()
         temp.distance_to_time(distance, truck.speed)
         current_time = current_time.add_time(temp)
 
-        if current_time >= TimeMod(10, 20) and truck.has_package(9):
-            # SOMEHOW UPDATE THE DAMN PACKAGE INFO
-            pass
+        # Update the address of the package with a wrong address
+        if current_time >= TimeMod(10, 20) and change_address:
+            package_to_change = truck.get_package(9)
+            where_to_deliver[places.address_to_place(package_to_change.address)].remove(package_to_change)
+            package_to_change.address = "410 S State St"
+            where_to_deliver[places.address_to_place(package_to_change.address)].append(package_to_change)
+            change_address = False
 
         # 3) Unload packages
         packages = where_to_deliver[current_place]
