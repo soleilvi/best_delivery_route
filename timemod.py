@@ -32,6 +32,7 @@ class TimeMod:
         if time_str[-2:] == "pm":
             self.hour += 12
 
+    # TODO: Delete theses methods once you have changed to operators in all the other files
     def is_less_than(self, another_time):
         if self.hour < another_time.hour or (self.hour == another_time.hour and self.minutes < another_time.minutes):
             return True
@@ -42,9 +43,31 @@ class TimeMod:
             return True
         return False
     
+    # Overloading comparison operator <
+    def __lt__(self, another_time):
+        if self.hour < another_time.hour or (self.hour == another_time.hour and self.minutes < another_time.minutes):
+            return True
+        return False
+    
+    # Overloading comparison operator ==
+    def __eq__(self, another_time):
+        if self.hour == another_time.hour and self.minutes == another_time.minutes:
+            return True
+        return False
+    
+    # Overloading comparison operator <=
+    def __le__(self, another_time):
+        if self.__lt__(another_time) or self.__eq__(another_time):
+            return True
+        return False
+    
     def add_time(self, time_to_add):
         added_hours = (self.hour + time_to_add.hour) % 24
         added_minutes = self.minutes + time_to_add.minutes
+
+        print("Original hours and minutes:", self.hour, self.minutes)
+        print("Other hours and minutes:", time_to_add.hour, time_to_add.minutes)
+        print("Hours and minutes:", added_hours, added_minutes)
 
         if added_minutes > 60:
             added_hours += int(added_minutes/60)
