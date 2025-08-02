@@ -1,4 +1,5 @@
 import heapq
+from itertools import zip_longest
 
 from timemod import TimeMod
 from package_hash import PackageHash
@@ -19,9 +20,10 @@ def print_truck_contents(trucks: list):
     print("-----------------------------------")
     print("|    TRUCK 1     |    TRUCK 2     |")
     print("|---------------------------------|")
-    for p1, p2 in zip(trucks[1].packages, trucks[2].packages): 
-        print(f"| package {i}: {p1.id}".ljust(16), "|" 
-              f" package {i}: {p2.id}".ljust(16), "|")
+    for p1, p2 in zip_longest(trucks[1].packages, trucks[2].packages): 
+        p1_str = f"package {i}: {p1.id}" if p1 is not None else " " 
+        p2_str = f"package {i}: {p2.id}" if p2 is not None else " "
+        print(f"| {p1_str.ljust(14)} | {p2_str.ljust(14)} |")
         i += 1
     print("-----------------------------------")
 
