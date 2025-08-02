@@ -6,14 +6,6 @@ from package_hash import PackageHash
 from places_hash import PlacesHash
 from truck import Truck
 
-'''
-NOTE: there is a minor bug caused by not removing x and y in the "Must be" 
-section. It could mess up the count when loading the trucks. Ultimately, I 
-actually think this bug is harmless for now and does not make enough trouble
-to merit the effort of resolving it since I'd need to reformat a big chunk
-of the code.
-'''
-
 def print_truck_contents(trucks: list):
     i = 1
     print("           TRUCK CONTENTS          ")

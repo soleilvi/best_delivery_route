@@ -11,9 +11,6 @@ from timemod import TimeMod
 from christofides import *
 from delivery import *
 
-# You need one truck to leave late to wait for the packages that are late. Truck 1 is the "early" truck, while truck 2 is the "late" truck.
-# Send the other one to deliver all the packages 
-
 def load_package_data(file_path):
     packages = []
 
@@ -76,69 +73,27 @@ trucks = {1: Truck(1, TimeMod(8, 0)), 2: Truck(2, TimeMod(9, 30))}
 package_hash.load(packages)
 places_hash.load(places)
 packages_to_deliver = []
-
 for package in packages:
     packages_to_deliver.append(package)
 heapq.heapify(packages_to_deliver)  # Priority queue that sorts the packages by deadline.
-# for package in packages_to_deliver:
-#     print(package.id, package.deadline.time_to_str())
 
 distance_graph = load_distance_graph(places)
-# # Print distance table
-# print("    ", end="")
-# for i, row in enumerate(distance_graph):
-#     if i < len(distance_graph) - 2:
-#         print(i, " ", end="")
-#     else:
-#         print(i, " ")
-# for i, row in enumerate(distance_graph):
-#     print(i, ": ", row)
 
 total_distance_travelled = 0
 j = 0
-# TODO: make a for-loop for the trucks
 while packages_to_deliver:
-    print("TO DELIVER:")
-    print(packages_to_deliver)
     if trucks[1].is_empty() and trucks[2].is_empty():
         load_trucks(trucks, package_hash, packages_to_deliver)
         print_truck_contents(trucks)
     truck = trucks[(j % 2) + 1]  # Alternating between trucks
     route_info = get_delivery_details(truck.packages, places_hash)
-
     where_to_unload = route_info[1]
-
-    # Delete
-    print("PLACES TO UNLOAD")
-    for key in where_to_unload:
-        print("Place:", key.id, ", packages: ", end="")
-        for i, package in enumerate(where_to_unload[key]):
-            if i < len(where_to_unload[key]) - 1: 
-                print(package.id, end=" ")
-            else:
-                print(package.id)
-
-    # # Delete
-    # for i, route in enumerate(route_info[0]):
-    #     print(f"TRUCK {truck.id} ROUTE {i}")
-    #     for place in route:
-    #         print(f"{place.id}")
 
     routes = []
     for i, route in enumerate(route_info[0]):
         routes.append(christofides(route, distance_graph, places_hash))
-        # # Delete
-        # print("TRUCK 1 CHRISTOFIDES ROUTE", i)
-        # for place in routes[-1]:
-        #     print(f"{place.id}: ", end="")
-        #     for i, p in enumerate(routes[-1][place]):
-        #         if i < len(routes[-1][place]) - 1:
-        #             print(f"{p.id}, ", end="")
-        #         else:
-        #             print(p.id)
 
     if len(routes) > 1:
-        print("the length of the routes is more than 1")
         for i in range(1, len(routes)):
             if i == 1:
                 full_route = connect_paths(routes[i - 1], routes[i], distance_graph, places_hash)
@@ -147,14 +102,15 @@ while packages_to_deliver:
     else:
         full_route = routes[0]
 
-    print(f"TRUCK {truck.id} FULL ROUTE:")
-    for place in full_route:
-        print(f"{place.id}: ", end="")
-        for i, p in enumerate(full_route[place]):
-            if i < len(full_route[place]) - 1:
-                print(f"{p.id}, ", end="")
-            else:
-                print(p.id)
+    # Uncomment to see the graph that represents the route the truck will take. 
+    # print(f"TRUCK {truck.id} ROUTE:")
+    # for place in full_route:
+    #     print(f"{place.id}: ", end="")
+    #     for i, p in enumerate(full_route[place]):
+    #         if i < len(full_route[place]) - 1:
+    #             print(f"{p.id}, ", end="")
+    #         else:
+    #             print(p.id)
 
     print(f"TRUCK {truck.id} DELIVERY:")
     update_info = deliver_packages(full_route, where_to_unload, distance_graph, truck, places_hash)
@@ -164,29 +120,3 @@ while packages_to_deliver:
     j += 1
 
 print(f"TOTAL DISTANCE: {total_distance_travelled} miles")
-
-# # Print packages hash
-# for i, bucket in enumerate(package_hash.hash):
-#     if bucket is not None:
-#         if isinstance(bucket, list):
-#             for package in bucket:
-#                 print(f"Hash Index: {i}, Package ID: {package.id}, Address: {package.address}, City: {package.city}, State: {package.state}, Zip: {package.zip}, Deadline: {package.deadline}, Weight: {package.weight}, Notes: {package.notes}")
-#         else:
-#             print(f"Hash Index: {i}, Package ID: {bucket.id}, Address: {bucket.address}, City: {bucket.city}, State: {bucket.state}, Zip: {bucket.zip}, Deadline: {bucket.deadline}, Weight: {bucket.weight}, Notes: {bucket.notes}")
-#     else:
-#         print(f"Hash Index: {i} is empty.")
-# # Ensure get() works
-# for package in packages:
-#     pee = package_hash.get(package)
-#     print(pee.id)
-
-# # Print places hash
-# for i, bucket in enumerate(places_hash.hash):
-#     if bucket is not None:
-#         for place in bucket:
-#             print(f'in bucket. Index = {i}')
-#             print(f'Id: {place.id}, Name: {place.name}, Address: {place.address}')
-# # Ensure get() works
-# for place in places:
-#     pee = places_hash.get(place)
-#     print(pee.id)

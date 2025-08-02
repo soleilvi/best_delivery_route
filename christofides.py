@@ -1,7 +1,5 @@
 import heapq
 
-# TODO: would it be good to make a dictionary that includes the distance as well as the node...?
-
 # Calculate the minimum spanning tree (MST) using Prim's algorithm
 def get_mst(nodes_list, distance_graph, places):
     current_node = places.get(places.address_to_place("HUB"))  # Starting node for the MST
