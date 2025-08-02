@@ -94,13 +94,29 @@ distance_graph = load_distance_graph(places)
 # for i, row in enumerate(distance_graph):
 #     print(i, ": ", row)
 
-load_trucks(trucks, package_hash, packages_to_deliver)
-print_truck_contents(trucks)
+total_distance_travelled = 0
+j = 0
 # TODO: make a for-loop for the trucks
-for truck in trucks.values():
+while packages_to_deliver:
+    print("TO DELIVER:")
+    print(packages_to_deliver)
+    if trucks[1].is_empty() and trucks[2].is_empty():
+        load_trucks(trucks, package_hash, packages_to_deliver)
+        print_truck_contents(trucks)
+    truck = trucks[(j % 2) + 1]  # Alternating between trucks
     route_info = get_delivery_details(truck.packages, places_hash)
 
     where_to_unload = route_info[1]
+
+    # Delete
+    print("PLACES TO UNLOAD")
+    for key in where_to_unload:
+        print("Place:", key.id, ", packages: ", end="")
+        for i, package in enumerate(where_to_unload[key]):
+            if i < len(where_to_unload[key]) - 1: 
+                print(package.id, end=" ")
+            else:
+                print(package.id)
 
     # # Delete
     # for i, route in enumerate(route_info[0]):
@@ -121,11 +137,15 @@ for truck in trucks.values():
         #         else:
         #             print(p.id)
 
-    for i in range(1, len(routes)):
-        if i == 1:
-            full_route = connect_paths(routes[i - 1], routes[i], distance_graph, places_hash)
-        else:
-            full_route = connect_paths(routes[i], full_route, distance_graph, places_hash)
+    if len(routes) > 1:
+        print("the length of the routes is more than 1")
+        for i in range(1, len(routes)):
+            if i == 1:
+                full_route = connect_paths(routes[i - 1], routes[i], distance_graph, places_hash)
+            else:
+                full_route = connect_paths(routes[i], full_route, distance_graph, places_hash)
+    else:
+        full_route = routes[0]
 
     print(f"TRUCK {truck.id} FULL ROUTE:")
     for place in full_route:
@@ -136,18 +156,14 @@ for truck in trucks.values():
             else:
                 print(p.id)
 
-    # TODO: Add up distances
     print(f"TRUCK {truck.id} DELIVERY:")
-    deliver_packages(full_route, where_to_unload, distance_graph, truck, places_hash)
+    update_info = deliver_packages(full_route, where_to_unload, distance_graph, truck, places_hash)
+    total_distance_travelled += update_info[0]
+    truck.depart_time = update_info[1]
 
-# print("PLACES TO UNLOAD")
-# for key in where_to_unload1:
-#     print("Place: ", key.id)
-#     for package in where_to_unload1[key]:
-#         print("Packages: ", package.id)
+    j += 1
 
-# TODO: send out the first truck out again
-
+print(f"TOTAL DISTANCE: {total_distance_travelled} miles")
 
 # # Print packages hash
 # for i, bucket in enumerate(package_hash.hash):

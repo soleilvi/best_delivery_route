@@ -11,8 +11,12 @@ class Truck:
     def is_full(self):
         if len(self.packages) >= self.capacity:
             return True
-        else:
-            return False
+        return False
+        
+    def is_empty(self):
+        if len(self.packages) == 0:
+            return True
+        return False
         
     def load_package(self, package):
         if self.is_full():

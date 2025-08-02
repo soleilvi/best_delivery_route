@@ -52,10 +52,10 @@ def load_trucks(trucks: list, packages: PackageHash, packages_to_deliver: list):
                 time = TimeMod()
                 time.str_to_time(note[-8:]) # contains "xx:xx xm"
                 # Load delayed packages into the late truck if they will arrive at the facility before it departs. Otherwise, it will have to wait for the first truck to come back.
-                if time <= late_truck.depart_time:
-                    if not late_truck.is_full(): late_truck.load_package(package)
-                else:
+                if time <= early_truck.depart_time:
                     if not early_truck.is_full(): early_truck.load_package(package)
+                else:
+                    if not late_truck.is_full(): late_truck.load_package(package)
 
             elif "Must be" in note:  # Must be delivered with x, y
                 x = packages.get_through_id(int(note[-6:-4]))
@@ -134,7 +134,7 @@ def get_delivery_details(packages: list, places: PlacesHash):
         if deadline in routes:
             routes[deadline].add(destination)
         else:
-            # print("package:", package.id, ", deadline:", deadline)
+            print("package:", package.id, ", deadline:", deadline)
             routes[deadline] = {destination}
 
         where_to_deliver.setdefault(destination, []).append(package)  # Essentially an if-statement to check if the dictionary has a list before appending the value
@@ -220,15 +220,18 @@ def deliver_packages(route: dict, where_to_deliver: dict, distances: list, truck
     current_time = truck.depart_time
     total_distance = 0
     previous_place = places.get(places.address_to_place("HUB"))  # Delivery facility, or node 0
+    current_place = None
 
     # Find the node that will start the priority path
     minimum = TimeMod(23, 59)
-    for connection in route[previous_place]:
+    for i, connection in enumerate(route[previous_place]):
         for package in where_to_deliver[connection]:
-            # print("current connection:", connection.id, "package", package.id)
             if package.deadline < minimum:
                 minimum = package.deadline
                 current_place = connection
+        # If both connections have EOD as their deadlines
+        if i == len(route[previous_place]) - 1 and current_place is None:
+            current_place = connection
 
     for place in route[current_place]:
         if place.id != 0:
@@ -284,6 +287,6 @@ def deliver_packages(route: dict, where_to_deliver: dict, distances: list, truck
     current_time = current_time.add_time(temp)
     print(f"Returned to the warehouse at {current_time.time_to_str()}.")
 
-    print("DISTANCE COVERED: ", total_distance)
+    print("DISTANCE COVERED:", total_distance)
 
     return total_distance, current_time
