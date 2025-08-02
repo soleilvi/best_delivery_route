@@ -90,7 +90,7 @@ def load_trucks(trucks: list, packages: PackageHash, packages_to_deliver: list):
                         deliver_together.remove(set)
                         linked_truck = late_truck
                         break
-            else:
+            elif not linked_truck.is_full():
                 linked_truck.load_packages(set)
 
                 # If any of the linked packages were loaded onto the wrong truck before, we should remove them
@@ -104,13 +104,10 @@ def load_trucks(trucks: list, packages: PackageHash, packages_to_deliver: list):
         # 4) Add package based on time priority. Since packages_to_deliver is a priority queue based on delivery time, we just need to worry about deadines and whether the truck is full.
         # Alternate between each truck getting loaded up to distribute the deadline packages evenly
         if not note:  # Making sure the package was not removed previously
-            if load_late_truck and not late_truck.is_full() and late_truck.depart_time.is_less_than(package.deadline):
-                print(f"loading {package.id} into late truck")
-                late_truck.load_package(package)
-                load_late_truck = False
-            elif not early_truck.is_full():
+            if not early_truck.is_full():
                 early_truck.load_package(package)
-                load_late_truck = True
+            elif not late_truck.is_full():
+                late_truck.load_package(package)
 
         heapq.heappop(packages_to_deliver)
 
@@ -118,27 +115,46 @@ def load_trucks(trucks: list, packages: PackageHash, packages_to_deliver: list):
 # Get a list of all the places the truck will need to visit to deliver the packages. 
 def get_delivery_details(packages: list, places: PlacesHash):    
     hub = places.get(places.address_to_place("HUB"))
-    route = [{hub}, {hub}]  # Packages that have a deadline are on the first list, the rest are in the second
+    eod = TimeMod(23,59)
+    routes = {eod.time_to_str(): {hub}}  # Different routes according to each package deadline
+    min_time = eod
     where_to_deliver = {}  # Holds information for where to deliver packages
 
     # 1) Loop over packages to retrieve the address of each of their destinations. Put them in a set to avoid repeats.
     for package in packages:
         destination = places.get(places.address_to_place(package.address))
+        deadline = package.deadline.time_to_str()
 
         # 2) Separate the packages that have a deadline from the ones that don't
-        if package.deadline.is_less_than(TimeMod(23, 59)):  # If the package has a deadline that isn't EOD
-            route[0].add(destination)
+        if deadline in routes:  # If the package has a deadline that isn't EOD
+            routes[deadline].add(destination)
         else:
-            route[1].add(destination)
+            print("package:", package.id, ", deadline:", deadline)
+            routes[deadline] = {hub, destination}
+            # deadlines.append(package.deadline)
+            if package.deadline < min_time:
+                min_time = package.deadline
 
         where_to_deliver.setdefault(destination, []).append(package)  # Essentially an if-statement to check if the dictionary has a list before appending the value
+
+    print("minimum:", min_time.time_to_str())
     
     #3) If there are any duplicates, remove them
-    for place in route[0]:
-        if place in route[1] and place != hub:
-            route[1].remove(place)
+    for place in routes[min_time.time_to_str()]:
+        for key in routes:
+            if key == min_time.time_to_str():
+                continue
+            if place in routes[key] and place != hub:
+                routes[key].remove(place)
 
-    return route, where_to_deliver
+    # 4) Only return the values. Make sure they are in order according to their corresponding deadline.
+    routes_list = []
+    keys = list(routes.keys())
+    keys.sort()
+    for key in keys:
+        routes_list.append(routes[key])
+
+    return routes_list, where_to_deliver
 
 
 # Connects the priority package route with the non-priority one
@@ -193,11 +209,14 @@ def deliver_packages(route: dict, where_to_deliver: dict, distances: list, truck
     while next_place.id != 0:
         print(f"At place {current_place.id}")
         # 1) Add distance to total_distance
-        total_distance +=  distances[previous_place.id][current_place.id]
+        distance = distances[previous_place.id][current_place.id]
+        total_distance +=  distance
+        print("Distance travelled:", distance)
 
         # 2) Translate distance to time
         temp = TimeMod()
-        temp.distance_to_time(total_distance, truck.speed)
+        # TODO: ok you should check if it is converting to time correctly
+        temp.distance_to_time(distance, truck.speed)
         current_time = current_time.add_time(temp)
 
         # 3) Unload packages
@@ -222,3 +241,4 @@ def deliver_packages(route: dict, where_to_deliver: dict, distances: list, truck
             if destination != previous_place:
                 next_place = destination
                 break
+    print("DISTANCE COVERED: ", total_distance)
