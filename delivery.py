@@ -37,7 +37,6 @@ def load_trucks(trucks: list, packages: PackageHash, packages_to_deliver: list):
     deliver_together = []  # Will contain sets with the IDs of packages that need to be delivered together
     early_truck = trucks[1] # Truck that leaves when the shift starts
     late_truck = trucks[2] # Truck that waits for late packages
-    load_late_truck = True
     linked_truck = None
 
     while packages_to_deliver and not (early_truck.is_full() and late_truck.is_full()):
@@ -78,7 +77,6 @@ def load_trucks(trucks: list, packages: PackageHash, packages_to_deliver: list):
 
         # 3) Add any packages that we have identified are linked together
         for set in deliver_together:
-            # 
             if linked_truck is None:
                 for package in set:
                     if early_truck.has_package(package):
@@ -111,6 +109,11 @@ def load_trucks(trucks: list, packages: PackageHash, packages_to_deliver: list):
                 late_truck.load_package(package)
 
         heapq.heappop(packages_to_deliver)
+
+    # In case a package was loaded onto a truck and was not removed previously (AKA linked packages)
+    for package in packages_to_deliver:
+        if early_truck.has_package(package) or late_truck.has_package(package):
+            packages_to_deliver.remove(package) 
 
 
 # Get a list of all the places the truck will need to visit to deliver the packages. 
