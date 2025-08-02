@@ -23,7 +23,6 @@ class Truck:
     def load_packages(self, package_set):
         self.packages.update(package_set)
         if self.is_full():
-            current_load = len(self.packages)
             self.packages.discard(package_set)
             raise OverflowError(f"Truck is full. Maximum size is {self.capacity}, current load is {len(self.packages)}")
         
@@ -37,11 +36,8 @@ class Truck:
 
     def has_package(self, package):
         if isinstance(package, int):
-            print("PEE")
             for _package in self.packages:
-                print(f"package id stuff: {_package.id}")
                 if _package.id == package:
-                    print("conclusion true")
                     return True
         else:
             if package in self.packages:

@@ -65,10 +65,6 @@ class TimeMod:
         added_hours = (self.hour + time_to_add.hour) % 24
         added_minutes = self.minutes + time_to_add.minutes
 
-        print("Original hours and minutes:", self.hour, self.minutes)
-        print("Other hours and minutes:", time_to_add.hour, time_to_add.minutes)
-        print("Hours and minutes:", added_hours, added_minutes)
-
         if added_minutes > 60:
             added_hours += int(added_minutes/60)
             added_minutes = (self.minutes + time_to_add.minutes) % 60

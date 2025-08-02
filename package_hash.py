@@ -51,12 +51,10 @@ class PackageHash:
         
         if self.has_package(package):
             self.hash[index].remove(package)
-            print(f"removed {package.id}")
 
             # If there are no other packages in the bucket at the current index 
             if not self.hash[index]:
                 self.hash[index] = None
-                print(f"emptied bucket containing {package.id}")
             
         else:
             raise ValueError("Package not in hash, could not remove it.")
