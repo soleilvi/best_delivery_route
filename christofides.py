@@ -116,7 +116,6 @@ def is_disjoint(node_connection_dict, current_node, complete_node_count):
 
 # For nodes that have more than two connections, we want to make a direct path between its connections by replacing [(n, x), (n, y)] with [(x, y)]
 def reconnect_nodes(node_connection_dict, n, x, y):
-    print("n is ", n.id, ", x is ", x.id, ", y is ", y.id)
     n_is_even = len(node_connection_dict[n]) % 2 == 0
     x_is_even = len(node_connection_dict[x]) % 2 == 0
     y_is_even = len(node_connection_dict[y]) % 2 == 0
@@ -164,7 +163,6 @@ def simplify_edges(distance_graph, eulerian_graph):
 
     # 2) Get the distances between all the destination nodes and put them in a priority queue 
     while nodes_over_two_edges:
-        print("on node", node.id)
         node = nodes_over_two_edges.pop()
         destination_nodes = list(node_connections[node])
         destination_node_distances = []
@@ -254,6 +252,5 @@ def christofides(node_number, distance_graph, places):
     mpm = get_mpm(mst, distance_graph)
     eulerian = merge_graphs(mst, mpm)
     best_path = simplify_edges(distance_graph, eulerian)
-    weight = get_graph_weight(best_path, distance_graph, places)
 
-    return (best_path, weight)
+    return best_path

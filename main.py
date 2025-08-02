@@ -96,61 +96,49 @@ distance_graph = load_distance_graph(places)
 
 load_trucks(trucks, package_hash, packages_to_deliver)
 print_truck_contents(trucks)
-truck1_route_info = get_delivery_details(trucks[1].packages, places_hash)
-truck2_route_info = get_delivery_details(trucks[2].packages, places_hash)
+# TODO: make a for-loop for the trucks
+for truck in trucks.values():
+    route_info = get_delivery_details(truck.packages, places_hash)
 
-where_to_unload1 = truck1_route_info[1]
-where_to_unload2 = truck2_route_info[1]
+    where_to_unload = route_info[1]
 
-for i, route in enumerate(truck1_route_info[0]):
-    print("TRUCK 1 ROUTE", i)
-    for place in route:
-        print(f"{place.id}")
-for i, route in enumerate(truck2_route_info[0]):
-    print("TRUCK 2 ROUTE", i)
-    for place in route:
-        print(f"{place.id}")
+    # # Delete
+    # for i, route in enumerate(route_info[0]):
+    #     print(f"TRUCK {truck.id} ROUTE {i}")
+    #     for place in route:
+    #         print(f"{place.id}")
 
-routes1 = []
-routes2 = []
-for i, route in enumerate(truck1_route_info[0]):
-    routes1.append(christofides(route, distance_graph, places_hash))
-    print("TRUCK 1 CHRISTOFIDES ROUTE", i)
-    for place in routes1[-1]:
+    routes = []
+    for i, route in enumerate(route_info[0]):
+        routes.append(christofides(route, distance_graph, places_hash))
+        # # Delete
+        # print("TRUCK 1 CHRISTOFIDES ROUTE", i)
+        # for place in routes[-1]:
+        #     print(f"{place.id}: ", end="")
+        #     for i, p in enumerate(routes[-1][place]):
+        #         if i < len(routes[-1][place]) - 1:
+        #             print(f"{p.id}, ", end="")
+        #         else:
+        #             print(p.id)
+
+    for i in range(1, len(routes)):
+        if i == 1:
+            full_route = connect_paths(routes[i - 1], routes[i], distance_graph, places_hash)
+        else:
+            full_route = connect_paths(routes[i], full_route, distance_graph, places_hash)
+
+    print(f"TRUCK {truck.id} FULL ROUTE:")
+    for place in full_route:
         print(f"{place.id}: ", end="")
-        for i, p in enumerate(routes1[-1][place]):
-            if i < len(routes1[-1][place]) - 1:
+        for i, p in enumerate(full_route[place]):
+            if i < len(full_route[place]) - 1:
                 print(f"{p.id}, ", end="")
             else:
                 print(p.id)
-for i, route in enumerate(truck2_route_info[0]):
-    routes2.append(christofides(route, distance_graph, places_hash))
 
-truck1_full_route = connect_paths(routes1[0], routes1[1], distance_graph, places_hash)
-truck1_full_route = connect_paths(routes1[2], truck1_full_route, distance_graph, places_hash)
-truck2_full_route = connect_paths(routes2[0], routes2[1], distance_graph, places_hash)
-
-
-print("TRUCK 1 ROUTE UPDATED")
-for place in truck1_full_route:
-    print(f"{place.id}: ", end="")
-    for i, p in enumerate(truck1_full_route[place]):
-        if i < len(truck1_full_route[place]) - 1:
-            print(f"{p.id}, ", end="")
-        else:
-            print(p.id)
-
-print("TRUCK 2 ROUTE UPDATED")
-for place in truck2_full_route:
-    print(f"{place.id}: ", end="")
-    for i, p in enumerate(truck2_full_route[place]):
-        if i < len(truck2_full_route[place]) - 1:
-            print(f"{p.id}, ", end="")
-        else:
-            print(p.id)
-
-# for place in truck1_route:
-#     print(f'Id: {place.id}, Name: {place.name}, Address: {place.address}')
+    # TODO: Add up distances
+    print(f"TRUCK {truck.id} DELIVERY:")
+    deliver_packages(full_route, where_to_unload, distance_graph, truck, places_hash)
 
 # print("PLACES TO UNLOAD")
 # for key in where_to_unload1:
@@ -158,10 +146,8 @@ for place in truck2_full_route:
 #     for package in where_to_unload1[key]:
 #         print("Packages: ", package.id)
 
-print("TRUCK 1 DELIVERY:")
-deliver_packages(truck1_full_route, where_to_unload1, distance_graph, trucks[1], places_hash)
-print("\nTRUCK 2 DELIVERY")
-deliver_packages(truck2_full_route, where_to_unload2, distance_graph, trucks[2], places_hash)
+# TODO: send out the first truck out again
+
 
 # # Print packages hash
 # for i, bucket in enumerate(package_hash.hash):

@@ -15,6 +15,7 @@ of the code.
 
 def print_truck_contents(trucks: list):
     i = 1
+    print("           TRUCK CONTENTS          ")
     print("-----------------------------------")
     print("|    TRUCK 1     |    TRUCK 2     |")
     print("|---------------------------------|")
@@ -128,7 +129,7 @@ def get_delivery_details(packages: list, places: PlacesHash):
         if deadline in routes:
             routes[deadline].add(destination)
         else:
-            print("package:", package.id, ", deadline:", deadline)
+            # print("package:", package.id, ", deadline:", deadline)
             routes[deadline] = {destination}
 
         where_to_deliver.setdefault(destination, []).append(package)  # Essentially an if-statement to check if the dictionary has a list before appending the value
@@ -209,6 +210,7 @@ def connect_paths(priority_route: dict, regular_route: dict, distances: list, pl
     
 
 # Show update messages and track time with this
+# TODO: Correct the address for package 9 here
 def deliver_packages(route: dict, where_to_deliver: dict, distances: list, truck: Truck, places: PlacesHash):
     current_time = truck.depart_time
     total_distance = 0
@@ -218,7 +220,7 @@ def deliver_packages(route: dict, where_to_deliver: dict, distances: list, truck
     minimum = TimeMod(23, 59)
     for connection in route[previous_place]:
         for package in where_to_deliver[connection]:
-            print("current connection:", connection.id, "package", package.id)
+            # print("current connection:", connection.id, "package", package.id)
             if package.deadline < minimum:
                 minimum = package.deadline
                 current_place = connection
@@ -229,20 +231,26 @@ def deliver_packages(route: dict, where_to_deliver: dict, distances: list, truck
             break
     
     while current_place.id != 0:
-        print(f"At place {current_place.id}")
+        print(f"At place with ID {current_place.id}")
         # 1) Add distance to total_distance
         distance = distances[previous_place.id][current_place.id]
         total_distance +=  distance
-        print("Distance travelled:", distance)
+        # print("Distance travelled:", distance)
 
         # 2) Translate distance to time
         temp = TimeMod()
         temp.distance_to_time(distance, truck.speed)
         current_time = current_time.add_time(temp)
 
+        if current_time >= TimeMod(10, 20) and truck.has_package(9):
+            # SOMEHOW UPDATE THE DAMN PACKAGE INFO
+            pass
+
         # 3) Unload packages
         packages = where_to_deliver[current_place]
         for package in packages:
+
+
             print(f"Unloading package with ID {package.id}.")
             truck.unload_package(package)
 
@@ -261,6 +269,7 @@ def deliver_packages(route: dict, where_to_deliver: dict, distances: list, truck
             if destination != previous_place:
                 next_place = destination
                 break
+        print()
         
     # We also need to count the distance and time taken by the truck to return to the warehouse
     distance = distances[previous_place.id][current_place.id]
@@ -271,3 +280,5 @@ def deliver_packages(route: dict, where_to_deliver: dict, distances: list, truck
     print(f"Returned to the warehouse at {current_time.time_to_str()}.")
 
     print("DISTANCE COVERED: ", total_distance)
+
+    return total_distance, current_time
