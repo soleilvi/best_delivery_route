@@ -127,7 +127,7 @@ for i, route in enumerate(truck2_route_info[0]):
     routes2.append(christofides(route, distance_graph, places_hash))
 
 truck1_full_route = connect_paths(routes1[0], routes1[1], distance_graph, places_hash)
-# truck1_full_route = connect_paths(truck1_full_route, routes1[2], distance_graph, places_hash)
+truck1_full_route = connect_paths(routes1[2], truck1_full_route, distance_graph, places_hash)
 # truck2_full_route = connect_paths(truck2_priority_route[0], truck2_regular_route[0], distance_graph, places_hash)
 
 print("TRUCK 1 ROUTE UPDATED")

@@ -163,31 +163,48 @@ def connect_paths(priority_route: dict, regular_route: dict, distances: list, pl
     priority_connections = list(priority_route[hub])
     regular_connections = list(regular_route[hub])
     minimum = 1000
-    
-    # 1) Compare the distances between the nodes that connect to the hub in the two lists 
-    for i in range(4):
-        j = 0
-        if i >= 2:
-            j = 1
-        p = priority_connections[j]  # Connection to the hub from the priority route
-        r = regular_connections[i % 2]  # Connection to the hub from the regular route
-         
-        if distances[p.id][r.id] < minimum:
-            minimum = distances[p.id][r.id]
 
-            # p and r may not have the values that align with the minimum distance by the end of the loop, so we need new variables
-            x = p 
-            y = r
+    # See if there is only one connection in the priority package dict
+    if len(priority_connections) < 2:
+        stray = priority_connections[0]
+        # Assign x and y according to which distance between the stray node and the other hub connections is smaller
+        if distances[stray.id][regular_connections[0].id] < distances[stray.id][regular_connections[1].id]:
+            x = regular_connections[0]
+            y = regular_connections[1]
+        else:
+            x = regular_connections[1]
+            y = regular_connections[0]
 
-    # 2) Connect the nodes from the two different routes that have the least distance between them
-    priority_route[hub].remove(x)
-    regular_route[hub].remove(y)
+        # Simply add the node to the existing dict
+        regular_route[hub].remove(x)
+        regular_route[x].remove(hub)
+        regular_route[x].add(stray)
+        priority_route[stray].add(x)
+    else:
+        # 1) Compare the distances between the nodes that connect to the hub in the two lists 
+        for i in range(4):
+            j = 0
+            if i >= 2:
+                j = 1
+            p = priority_connections[j]  # Connection to the hub from the priority route
+            r = regular_connections[i % 2]  # Connection to the hub from the regular route
+            
+            if distances[p.id][r.id] < minimum:
+                minimum = distances[p.id][r.id]
 
-    priority_route[x].remove(hub)
-    priority_route[x].add(y)
+                # p and r may not have the values that align with the minimum distance by the end of the loop, so we need new variables
+                x = p 
+                y = r
 
-    regular_route[y].remove(hub)
-    regular_route[y].add(x)
+        # 2) Connect the nodes from the two different routes that have the least distance between them
+        priority_route[hub].remove(x)
+        regular_route[hub].remove(y)
+
+        priority_route[x].remove(hub)
+        priority_route[x].add(y)
+
+        regular_route[y].remove(hub)
+        regular_route[y].add(x)
 
     priority_route[hub].update(regular_route[hub])  # Merge the connections of the hub in each route
     regular_route.update(priority_route)  # Merge the two dictionaries
@@ -199,6 +216,7 @@ def connect_paths(priority_route: dict, regular_route: dict, distances: list, pl
 def deliver_packages(route: dict, where_to_deliver: dict, distances: list, truck: Truck, places: PlacesHash):
     current_time = truck.depart_time
     previous_place = places.get(places.address_to_place("HUB"))  # Delivery facility, or node 0
+    # TODO: make sure to start from the path with the priority packages
     current_place = list(route[previous_place])[0]
     for place in route[current_place]:
         if place.id != 0:
