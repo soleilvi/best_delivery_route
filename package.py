@@ -19,12 +19,12 @@ class Package:
 
     # Overloading comparison operator <=
     def __le__(self, other_package):
-        if self.deadline.is_less_than(other_package.deadline) or self.deadline.is_equal_to(other_package.deadline):
+        if self.deadline <= other_package.deadline:
             return True
         return False
     
     # Overloading comparison operator <
     def __lt__(self, other_package):
-        if self.deadline.is_less_than(other_package.deadline):
+        if self.deadline < other_package.deadline:
             return True
         return False

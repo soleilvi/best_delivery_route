@@ -50,7 +50,7 @@ def load_trucks(trucks: list, packages: PackageHash, packages_to_deliver: list):
                 time = TimeMod()
                 time.str_to_time(note[-8:]) # contains "xx:xx xm"
                 # Load delayed packages into the late truck if they will arrive at the facility before it departs. Otherwise, it will have to wait for the first truck to come back.
-                if time.is_less_than(late_truck.depart_time) or time.is_equal_to(late_truck.depart_time):
+                if time <= late_truck.depart_time:
                     if not late_truck.is_full(): late_truck.load_package(package)
                 else:
                     if not early_truck.is_full(): early_truck.load_package(package)
@@ -247,7 +247,7 @@ def deliver_packages(route: dict, where_to_deliver: dict, distances: list, truck
             truck.unload_package(package)
 
             # TODO: Overload < and <= operator on TimeMod objects as well?
-            if current_time.is_less_than(package.deadline) or current_time.is_equal_to(package.deadline):
+            if current_time <= package.deadline:
                 time_status = "on time"
             else: 
                 time_status = "late"
