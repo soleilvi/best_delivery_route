@@ -330,34 +330,6 @@ def simplify_edges(distance_graph, merged_graph):
 
     return node_connections
 
-# Add up the distance of all the paths in the graph to get the weight. Only works with hamiltonian tour graphs.
-# TODO: delete this function
-def get_graph_weight(graph, distance_graph, places):
-    visited = set()
-    node = places.get(places.address_to_place("HUB"))
-    node_with_end_connection = -1
-    weight = 0
-
-    while len(visited) < len(graph):
-        visited.add(node)
-        connections = list(graph[node])
-        destination = connections[0]
-        if destination.id == 0: node_with_end_connection = node
-               
-        if destination in visited:
-            destination = connections[1]
-            if destination.id == 0: node_with_end_connection = node
-
-        if destination in visited:
-            break
-
-        weight += distance_graph[node.id][destination.id]
-        node = destination
-
-    weight += distance_graph[0][node_with_end_connection.id]
-                
-    return weight
-
 
 def christofides(node_number, distance_graph, places):
     mst = get_mst(node_number, distance_graph, places)
