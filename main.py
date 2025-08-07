@@ -3,17 +3,15 @@ Student ID: 011029940
 Created by Soleil Vivero Rivera on August 2nd, 2025
 '''
 
-# TODO: descriptive comments before each function/module
-
 import csv
 import heapq
 
-from package import Package
-from place import Place
-from truck import Truck
-from places_hash import PlacesHash
-from package_hash import PackageHash
-from timemod import TimeMod
+from classes.package import Package
+from classes.place import Place
+from classes.truck import Truck
+from classes.places_hash import PlacesHash
+from classes.package_hash import PackageHash
+from classes.timemod import TimeMod
 
 from christofides import *
 from delivery import *

@@ -1,4 +1,4 @@
-from timemod import TimeMod
+from .timemod import TimeMod
 
 class Truck:
     """

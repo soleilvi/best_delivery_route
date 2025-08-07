@@ -6,10 +6,10 @@ packages that go in each truck.
 import heapq
 from itertools import zip_longest
 
-from timemod import TimeMod
-from package_hash import PackageHash
-from places_hash import PlacesHash
-from truck import Truck
+from classes.timemod import TimeMod
+from classes.package_hash import PackageHash
+from classes.places_hash import PlacesHash
+from classes.truck import Truck
 
 
 def print_truck_contents(trucks: list):
