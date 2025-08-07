@@ -152,15 +152,11 @@ def get_mpm(node_graph: dict, distance_graph: list):
     return bijection
 
 
-# TODO: actually make this function return a Eulerian tour....
 def merge_graphs(mst: dict, mpm: list): 
-    """ Merge the MST and MPM and find a Eulerian tour of the merged graph.
-    
-    A Eulerian tour is a cycle in a graph that traverses through each edge only once. This means that if you were to walk along the edges of the graph, you could visit every node in the graph without having to walk along the same edge twice. In a Eulerian tour, every node has an even number of edges connected to it.
-    """
+    """Merge the MST and MPM."""
     
     merged = mst.copy()
-    # 1) Merge the two graphs together
+    # Adding the MPM to the MST
     for node_pair in mpm:
         a = node_pair[0]
         b = node_pair[1]
@@ -169,8 +165,6 @@ def merge_graphs(mst: dict, mpm: list):
             merged[a].add(b)
         if a not in merged[b]:
             merged[b].add(a)    
-
-    # 2) Find a Eulerian tour of the merged graphs
         
     return merged
 
@@ -247,16 +241,15 @@ def reconnect_nodes(node_connection_dict, n, x, y):
             node_connection_dict[n].remove(y)
 
 
-# Make a hamiltonian tour out of the Eulerian tour.
-def simplify_edges(distance_graph, eulerian_graph):
-    """Makes a hamiltonian circuit out of the Eulerian tour.
+def simplify_edges(distance_graph, merged_graph):
+    """Makes a hamiltonian circuit out of the merged MST and MPM graphs.
     
     A Hamiltonian circuit is a path in a graph that visits each node exactly 
     once. For our Hamiltonian circuit, we are also adding the restriction that 
     each node needs to have exactly two edges. 
     """
     
-    node_connections = eulerian_graph.copy()
+    node_connections = merged_graph.copy()
     nodes_over_two_edges = set()
 
     # 1) Find which nodes have more than two paths connected to them.
