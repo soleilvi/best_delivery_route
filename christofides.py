@@ -20,7 +20,7 @@ The Christofides algorithm has the following steps:
 4) Combine the MST and MPM in such a way that each node has an even number of 
    edges. Duplicate paths between nodes are fine (multigraph).
 5) Make a Eulerian circuit out of the merged graph.
-6) Make a Hamiltonian circiut out of the Eulerian circuit by removing edges 
+6) Make a Hamiltonian circuit out of the Eulerian circuit by removing edges
    between vertices that are visited more than once.
 
 In reality, this program uses a pseudo-Christofides algorithm. It merges the 
@@ -57,6 +57,9 @@ def get_mst(nodes_list, distance_graph, places):
     4) Choose the edge with the smallest weight, given that it isn't connected 
        to a node we have already visited.
     5) Repeat 2-4 until all of the nodes in the graph are in the MST.
+
+    Time complexity: O(n^2log(n))
+        * n = nodes_list
     """
     
     current_node = places.get(places.address_to_place("HUB"))  # Node 0
@@ -114,6 +117,9 @@ def get_mpm(node_graph: dict, distance_graph: list):
     graph containing all of the nodes in the MST with an uneven number of 
     edges connecting to them. Therefore, the expected input for this function 
     is the result of the MST.
+
+    Time complexity: O(n^2log(n))
+        * n = node_graph
     """
     
     uneven_nodes = set()  # Nodes with an odd number of edges/paths.
@@ -153,7 +159,11 @@ def get_mpm(node_graph: dict, distance_graph: list):
 
 
 def merge_graphs(mst: dict, mpm: list): 
-    """Merge the MST and MPM."""
+    """Merge the MST and MPM.
+    
+    Time complexity: O(n)
+        * n = mst
+    """
     
     merged = mst.copy()
     # Adding the MPM to the MST
@@ -176,6 +186,9 @@ def is_disjoint(node_connection_dict, current_node, complete_node_count):
     the rest of the graph. It is not possible to access all the nodes in the 
     graph when starting its traversal at an arbitrary node. This is a helper 
     function for simplify_edges().
+
+    Time complexity: O(n)
+        * n = node_connection_dict
     """
 
     visited_nodes = set()
@@ -185,7 +198,7 @@ def is_disjoint(node_connection_dict, current_node, complete_node_count):
         if current_node in visited_nodes:
             pass
         else:
-            for destination in node_connection_dict[current_node]:
+            for destination in node_connection_dict[current_node]:  # O(1)
                 if destination not in visited_nodes:
                     unvisited_nodes.append(destination)
 
@@ -202,6 +215,9 @@ def reconnect_nodes(node_connection_dict, n, x, y):
     For nodes that have more than two connections, we want to make a direct 
     path between its connections by replacing [(n, x), (n, y)] with [(x, y)]. 
     This is a helper function for simplify_edges().
+
+    Time complexity: O(n)
+        * n = connections
     """
 
     n_is_even = len(node_connection_dict[n]) % 2 == 0
@@ -247,6 +263,9 @@ def simplify_edges(distance_graph, merged_graph):
     A Hamiltonian circuit is a path in a graph that visits each node exactly 
     once. For our Hamiltonian circuit, we are also adding the restriction that 
     each node needs to have exactly two edges. 
+
+    Time complexity: O(n^3log(n))
+        * n = node_connections
     """
     
     node_connections = merged_graph.copy()
@@ -271,10 +290,10 @@ def simplify_edges(distance_graph, merged_graph):
             # Prevent revisiting the same path several times and make runtime 
             # slightly faster with [(n-i):].
             for end_node in destination_nodes[(n-i):]:
-                destination_node_distances.append((distance_graph
-                                                   [start_node.id]
-                                                   [end_node.id], 
-                                                   start_node, end_node))
+                destination_node_distances.append((
+                    distance_graph[start_node.id][end_node.id], 
+                    start_node, 
+                    end_node))
             i -= 1
 
         heapq.heapify(destination_node_distances)
@@ -331,8 +350,13 @@ def simplify_edges(distance_graph, merged_graph):
     return node_connections
 
 
-def christofides(node_number, distance_graph, places):
-    mst = get_mst(node_number, distance_graph, places)
+def christofides(places_list, distance_graph, places):
+    """Assembling all the parts of the algorithm to make up the Christofides 
+    algorithm.
+    
+    Time complexity: O(n^3log(n))
+    """
+    mst = get_mst(places_list, distance_graph, places)
     mpm = get_mpm(mst, distance_graph)
     merged = merge_graphs(mst, mpm)
     best_path = simplify_edges(distance_graph, merged)

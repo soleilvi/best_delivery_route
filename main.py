@@ -13,7 +13,7 @@ from classes.places_hash import PlacesHash
 from classes.package_hash import PackageHash
 from classes.timemod import TimeMod
 
-from christofides import *
+from christofides import christofides
 from delivery import *
 
 def load_package_data(file_path: str):
@@ -155,4 +155,3 @@ while packages_to_deliver:
           f"{total_distance_travelled} miles.\n")
 
     j += 1
-
