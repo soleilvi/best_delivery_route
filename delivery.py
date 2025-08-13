@@ -28,7 +28,33 @@ def print_truck_contents(trucks: list):
     print("-----------------------------------")
 
 
-def load_trucks(trucks: list, packages: PackageHash, packages_to_deliver: list):
+def print_delivery_status(current_time: TimeMod, delivery_time_info: list):
+    """Prints the delivery status of every packages at the provided time."""
+
+    print(f"\n----DELIVERY STATUS AT {current_time.time_to_str()}----")
+    for i in range(len(delivery_time_info)):
+        # It is a given that package IDs start at 1, not 0
+        if i == 0:
+            continue
+
+        truck_id = delivery_time_info[i][0]
+        load_time = delivery_time_info[i][1]
+        delivery_time = delivery_time_info[i][2]
+        delivery_address = delivery_time_info[i][3]
+
+        if current_time < load_time:
+            status = "At hub"
+        elif current_time >= load_time and current_time < delivery_time:
+            status = "In transit on truck " + str(truck_id)
+        elif current_time >= delivery_time:
+            status = (f"Delivered to {delivery_address.name.replace('\n', '')} "
+                      f"at {delivery_time.time_to_str()}")
+
+        print(f"Package {i}: {status}")
+
+
+def load_trucks(trucks: list, packages: PackageHash, 
+                packages_to_deliver: list, delivery_time_info: list):
     """Loads package objects into each truck's packages attribute.
 
     Packages are loaded into each truck according to their delivery deadline 
@@ -82,9 +108,15 @@ def load_trucks(trucks: list, packages: PackageHash, packages_to_deliver: list):
                 if time <= early_truck.depart_time:
                     if not early_truck.is_full(): 
                         early_truck.load_package(package)
+                        delivery_time_info[package.id] = [early_truck.id, 
+                                                          early_truck.
+                                                          depart_time]
                 else:
                     if not late_truck.is_full(): 
                         late_truck.load_package(package)
+                        delivery_time_info[package.id] = [late_truck.id,
+                                                          late_truck.
+                                                          depart_time]
 
             # Must be delivered with x, y
             elif "Must be" in note: 
@@ -103,12 +135,18 @@ def load_trucks(trucks: list, packages: PackageHash, packages_to_deliver: list):
 
             # Can only be on truck x
             elif "Can only" in note:
-                if not trucks[int(note[-1])].is_full(): 
-                    trucks[int(note[-1])].load_package(package)
+                selected_truck = trucks[int(note[-1])]
+                if not selected_truck.is_full(): 
+                    selected_truck.load_package(package)
+                    delivery_time_info[package.id] = [selected_truck.id,
+                                                      selected_truck.depart_time]
 
             # Wrong address listed
             elif "Wrong address" in note:
-                if not late_truck.is_full(): late_truck.load_package(package)
+                if not late_truck.is_full(): 
+                    late_truck.load_package(package)
+                    delivery_time_info[package.id] = [late_truck.id,
+                                                      late_truck.depart_time]
 
         # 3) Add any packages that we have identified are linked together.
         for set in deliver_together:
@@ -116,11 +154,13 @@ def load_trucks(trucks: list, packages: PackageHash, packages_to_deliver: list):
                 for package in set:
                     if early_truck.has_package(package):
                         early_truck.load_packages(set)
+
                         deliver_together.remove(set)
                         linked_truck = early_truck
                         break
                     elif late_truck.has_package(package):
                         late_truck.load_packages(set)
+
                         deliver_together.remove(set)
                         linked_truck = late_truck
                         break
@@ -137,6 +177,9 @@ def load_trucks(trucks: list, packages: PackageHash, packages_to_deliver: list):
                     # truck's packages and the linked packages.
                     elif trucks[id].packages & set:
                         trucks[id].packages -= trucks[id].packages & set
+            for p in set:
+                delivery_time_info[p.id] = [linked_truck.id,
+                                            linked_truck.depart_time]
 
         # 4) Add package based on time priority. Since packages_to_deliver is 
         #    a priority queue based on delivery time, we just need to worry 
@@ -146,8 +189,12 @@ def load_trucks(trucks: list, packages: PackageHash, packages_to_deliver: list):
         if not note:  # Making sure the package was not loaded previously.
             if not early_truck.is_full():
                 early_truck.load_package(package)
+                delivery_time_info[package.id] = [early_truck.id,
+                                                  early_truck.depart_time]
             elif not late_truck.is_full():
                 late_truck.load_package(package)
+                delivery_time_info[package.id] = [late_truck.id,
+                                                  late_truck.depart_time]
 
         heapq.heappop(packages_to_deliver)
 
@@ -303,8 +350,9 @@ def connect_paths(route1: dict, route2: dict, distances: list,
     return route2
     
 
-def deliver_packages(route: dict, where_to_deliver: dict, distances: list,
-                     truck: Truck, places: PlacesHash):
+def deliver_packages(route: dict, where_to_deliver: dict, 
+                     distances: list, truck: Truck, 
+                     places: PlacesHash, delivery_time_info: list):
     """Visits each place in the delivery route, unloads the necessary 
     packages, and shows update messages at each stop.
 
@@ -376,10 +424,13 @@ def deliver_packages(route: dict, where_to_deliver: dict, distances: list,
             else: 
                 time_status = "late"
 
-            # 5) Show message
+            # 5) Show message and add the delivery time information to a list
             print(f"Delivered package {package.id} {time_status} to "
                   f"{current_place.name.replace('\n', '')} at "
                   f"{current_time.time_to_str()}.")
+            
+            delivery_time_info[package.id].extend([current_time, 
+                                                   current_place])
 
         # 6) Reconnect nodes
         previous_place = current_place

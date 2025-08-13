@@ -101,11 +101,17 @@ for package in packages:
     packages_to_deliver.append(package)
 heapq.heapify(packages_to_deliver)
 
+# Essentially a hash table that uses package IDs to get relevant information
+delivery_time_info = [None] * (len(packages) + 1)
+
 total_distance_travelled = 0
 j = 0
+print("STARTING DELIVERY DAY")
 while packages_to_deliver:
     if trucks[1].is_empty() and trucks[2].is_empty():
-        load_trucks(trucks, package_hash, packages_to_deliver)
+        print("LOADING TRUCKS")
+        load_trucks(trucks, package_hash, 
+                    packages_to_deliver, delivery_time_info)
         print_truck_contents(trucks)
 
     # Alternate between trucks each time the loop repeats. We're concentrating
@@ -147,11 +153,44 @@ while packages_to_deliver:
 
     print(f"TRUCK {truck.id} DELIVERY:")
     update_info = deliver_packages(full_route, where_to_unload, 
-                                   distance_graph, truck, places_hash)
+                                   distance_graph, truck,
+                                   places_hash, delivery_time_info)
     total_distance_travelled += update_info[0]
     truck.depart_time = update_info[1]
 
     print("Total distance covered by all trucks: "
           f"{total_distance_travelled} miles.\n")
+    print("-" * 100, "\n")
 
     j += 1
+
+print("ENDED DELIVERY DAY\n")
+
+# Asking the user if they want to check the progress of the packages at a 
+# specific time in the day and printing the status of the packages accordingly
+answer = ""
+while answer is not "N":
+    print("Type Y to get the delivery progress report of the packages at a "
+          "specific time of day. Type N to exit.")
+    answer = input("Answer: ")
+    if answer is "N" or answer is "n":
+        break
+    elif answer is "Y" or answer is "y":
+        time_str = input("Please provide the time at which you would like to "
+                         "see the progress report. Format your time in a "
+                         "24-hour format (for example, 13:12 instead of 1:12 "
+                         "PM): ")
+
+        try:
+            time = TimeMod()
+            time.str_to_time(time_str)
+        except ValueError:
+            print("The time you provided is invalid. Please make sure that "
+                  "you are not putting any spaces before the hour and that "
+                  "you're using a colon to separate the hours and minutes.\n")
+            continue
+
+        print_delivery_status(time, delivery_time_info)
+    else:
+        print("Invalid input, please try again")
+    print()  # New line
