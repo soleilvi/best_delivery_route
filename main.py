@@ -169,13 +169,13 @@ print("ENDED DELIVERY DAY\n")
 # Asking the user if they want to check the progress of the packages at a 
 # specific time in the day and printing the status of the packages accordingly
 answer = ""
-while answer is not "N":
+while answer != "N":
     print("Type Y to get the delivery progress report of the packages at a "
           "specific time of day. Type N to exit.")
     answer = input("Answer: ")
-    if answer is "N" or answer is "n":
+    if answer == "N" or answer == "n":
         break
-    elif answer is "Y" or answer is "y":
+    elif answer == "Y" or answer == "y":
         time_str = input("Please provide the time at which you would like to "
                          "see the progress report. Format your time in a "
                          "24-hour format (for example, 13:12 instead of 1:12 "
@@ -190,7 +190,7 @@ while answer is not "N":
                   "you're using a colon to separate the hours and minutes.\n")
             continue
 
-        print_delivery_status(time, delivery_time_info)
+        print_delivery_status(time, delivery_time_info, package_hash)
     else:
         print("Invalid input, please try again")
     print()  # New line

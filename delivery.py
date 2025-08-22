@@ -28,7 +28,8 @@ def print_truck_contents(trucks: list):
     print("-----------------------------------")
 
 
-def print_delivery_status(current_time: TimeMod, delivery_time_info: list):
+def print_delivery_status(current_time: TimeMod, delivery_time_info: list,
+                          packages: PackageHash):
     """Prints the delivery status of every packages at the provided time."""
 
     print(f"\n----DELIVERY STATUS AT {current_time.time_to_str()}----")
@@ -41,17 +42,30 @@ def print_delivery_status(current_time: TimeMod, delivery_time_info: list):
         load_time = delivery_time_info[i][1]
         delivery_time = delivery_time_info[i][2]
         delivery_address = delivery_time_info[i][3]
+        package = packages.get_through_id(i)
 
         if current_time < load_time:
-            status = "At hub"
+            status = "At the hub"
+            truck_id = "N/A"
+
+            if "Delayed" in package.notes:
+                arrival_time = TimeMod()
+                arrival_time.str_to_time(package.notes[-8:])
+
+                if arrival_time < load_time:
+                    status = "Not yet at the hub"
+                
         elif current_time >= load_time and current_time < delivery_time:
-            status = "In transit on truck " + str(truck_id)
+            status = "In transit"
         elif current_time >= delivery_time:
-            status = (f"Delivered to {delivery_address.name.replace('\n', '')} "
-                      f"at {delivery_time.time_to_str()}")
+            status = (f"Delivered at {delivery_time.time_to_str()}")
 
-        print(f"Package {i}: {status}")
+            
 
+        print(f"Package #{i}: {status}")
+        print(f"    - Address: {delivery_address.name.replace('\n', '')}\n"
+              f"    - Deadline: {package.deadline.time_to_str()}\n"
+              f"    - On truck: {truck_id}")
 
 def load_trucks(trucks: list, packages: PackageHash, 
                 packages_to_deliver: list, delivery_time_info: list):

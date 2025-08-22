@@ -80,6 +80,9 @@ class TimeMod:
             time_str += "0" + str(self.minutes)
         else:
             time_str += str(self.minutes)
+        
+        if self.hour == 23 and self.minutes == 59:
+            time_str = "EOD"
             
         return time_str
     
