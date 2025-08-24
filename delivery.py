@@ -29,8 +29,12 @@ def print_truck_contents(trucks: list):
 
 
 def print_delivery_status(current_time: TimeMod, delivery_time_info: list,
-                          packages: PackageHash):
-    """Prints the delivery status of every packages at the provided time."""
+                          packages: PackageHash, places: PlacesHash):
+    """Prints the delivery status of every packages at the provided time.
+    
+    Hard-coded string would need to change to a variable for future programs 
+    with different wrong-address packages.
+    """
 
     print(f"\n----DELIVERY STATUS AT {current_time.time_to_str()}----")
     for i in range(len(delivery_time_info)):
@@ -43,6 +47,10 @@ def print_delivery_status(current_time: TimeMod, delivery_time_info: list,
         delivery_time = delivery_time_info[i][2]
         delivery_address = delivery_time_info[i][3]
         package = packages.get_through_id(i)
+
+        # If the package with the wrong address has not been updated
+        if "Wrong" in package.notes and current_time < TimeMod(10, 20):
+            delivery_address = places.address_to_place("300 State St")
 
         if current_time < load_time:
             status = "At the hub"
@@ -59,8 +67,6 @@ def print_delivery_status(current_time: TimeMod, delivery_time_info: list,
             status = "In transit"
         elif current_time >= delivery_time:
             status = (f"Delivered at {delivery_time.time_to_str()}")
-
-            
 
         print(f"Package #{i}: {status}")
         print(f"    - Address: {delivery_address.name.replace('\n', '')}\n"

@@ -190,7 +190,8 @@ while answer != "N":
                   "you're using a colon to separate the hours and minutes.\n")
             continue
 
-        print_delivery_status(time, delivery_time_info, package_hash)
+        print_delivery_status(time, delivery_time_info, 
+                              package_hash, places_hash)
     else:
         print("Invalid input, please try again")
     print()  # New line
